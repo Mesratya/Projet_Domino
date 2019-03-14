@@ -1,10 +1,11 @@
 import random
+import numpy as np
 
 class domino:
-    def __init__(self,vala,valb,posa=None,posb=None):
+    def __init__(self,vala,valb,posa =(None,None),posb =(None,None)):
         self.vala=vala
         self.valb=valb
-        self.posa=posa
+        self.posa=posa # stocker ici la position des demi-dominos permettera à l'IHM d'afficher les dominos simplement en les parcourant dans l'objet plateau sans avoir à parcourir la grille grid
         self.posb=posb
 
     def __repr__(self):
@@ -112,33 +113,51 @@ class plateau(list):
     """Pour l'instant les domino sont posés en ligne sans considerer les virages"""
 
     def __init__(self,game):
-        self.grid = [[(None,None)]*game.size]*game.size # cette grille permettera le stockage de la position 2D des dominos
+        self.Nb_colonne  = int((4 * game.nb_domino) - 2)
+        self.Nb_ligne = int((4 * game.nb_domino) - 1)
+        self.grid = np.array([[None]*self.Nb_colonne]*self.Nb_ligne) # cette grille permet de lier les valeurs des demi-domino à leurs position réel sur le plateau, elle ne sert pas à l'IHM mais à la recherche de "contrainte topologique locale"
         self.extr_a = None
         self.extr_b = None
+        self.pos_extr_a = None # position des extremitées sur le plateau
+        self.pos_extr_b = None
         self.game = game
 
     def poser(self,domino,extr = None):
         """ajoute le domino au plateau à l'extremité souhaité"""
 
         if self.game.premiere_pose :
+            nb_domino = self.game.nb_domino
             self.append(domino)
             self.extr_a = domino.vala
             self.extr_b = domino.valb
+            self.pos_extr_a = (2*nb_domino-2,2*nb_domino-2) # On place le premier domino horizontalement au centre du plateau
+            self.pos_extr_b = (2*nb_domino-2,2*nb_domino-1)
+
 
         if extr == self.extr_a :
             if domino.valb == self.extr_a :
+                domino.posa = (self.pos_extr_a[0],self.pos_extr_a[1]-2)
+                domino.posb = (self.pos_extr_a[0],self.pos_extr_a[1]-1)
                 self.insert(0,domino)
                 self.extr_a = domino.vala
             else :
-                self.insert(0,domino.inverted())
+                domino = domino.inverted()
+                domino.posa = (self.pos_extr_a[0], self.pos_extr_a[1] - 2)
+                domino.posb = (self.pos_extr_a[0], self.pos_extr_a[1] - 1)
+                self.insert(0,domino)
                 self.extr_a = domino.valb
 
         elif extr == self.extr_b :
             if domino.vala == self.extr_b :
+                domino.posa = (self.pos_extr_b[0], self.pos_extr_b[1] + 1)
+                domino.posb = (self.pos_extr_b[0], self.pos_extr_b[1] + 2)
                 self.append(domino)
                 self.extr_b = domino.valb
             else :
-                self.append(domino.inverted())
+                domino = domino.inverted()
+                domino.posa = (self.pos_extr_b[0], self.pos_extr_b[1] + 1)
+                domino.posb = (self.pos_extr_b[0], self.pos_extr_b[1] + 2)
+                self.append(domino)
                 self.extr_b = domino.vala
 
 
@@ -289,6 +308,7 @@ class game:
 
 if __name__ == "__main__":
     Game = game()
+    print(Game.plateau, Game.plateau.grid)
 
 
 
