@@ -140,12 +140,14 @@ class plateau(list):
                 domino.posb = (self.pos_extr_a[0],self.pos_extr_a[1]-1)
                 self.insert(0,domino)
                 self.extr_a = domino.vala
+                self.pos_extr_a = domino.posa
             else :
                 domino = domino.inverted()
                 domino.posa = (self.pos_extr_a[0], self.pos_extr_a[1] - 2)
                 domino.posb = (self.pos_extr_a[0], self.pos_extr_a[1] - 1)
                 self.insert(0,domino)
                 self.extr_a = domino.vala
+                self.pos_extr_a = domino.posa
 
         elif extr == self.extr_b :
             if domino.vala == self.extr_b :
@@ -153,12 +155,14 @@ class plateau(list):
                 domino.posb = (self.pos_extr_b[0], self.pos_extr_b[1] + 2)
                 self.append(domino)
                 self.extr_b = domino.valb
+                self.pos_extr_b = domino.posb
             else :
                 domino = domino.inverted()
                 domino.posa = (self.pos_extr_b[0], self.pos_extr_b[1] + 1)
                 domino.posb = (self.pos_extr_b[0], self.pos_extr_b[1] + 2)
                 self.append(domino)
                 self.extr_b = domino.valb
+                self.pos_extr_b = domino.posb
 
 
 
