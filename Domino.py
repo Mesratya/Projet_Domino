@@ -55,9 +55,12 @@ class hand(list):
         dom_jouab = []
         extr_a = self.game.plateau.extr_a
         extr_b = self.game.plateau.extr_b
+        legal_a = self.game.orientations_legales("a")
+        legal_b = self.game.orientations_legales("b")
         for domino in self :
-            if domino.vala == extr_a or domino.valb == extr_a or domino.vala == extr_b or domino.valb == extr_b :
+            if ((domino.vala == extr_a or domino.valb == extr_a) and legal_a != []) or ((domino.vala == extr_b or domino.valb == extr_b)  and legal_b != []) :
                 dom_jouab.append(domino)
+
         return(dom_jouab)
 
     def domino_jouable_left_side(self):
@@ -128,10 +131,10 @@ class plateau(list):
     def position_demi_domino(self,pos_extr,extr_orientation,domino_orientation):
         '''calcul de la position des deux demi domino en fonction de la position et de l'orientation de l'extremité et de l'orientation du domino à poser'''
         (i,j) = pos_extr
-        print("(i,j) = ({0},{1})".format(i,j))
+        #print("(i,j) = ({0},{1})".format(i,j))
         (i,j) = (int(i),int(j))
-        print("(int(i),int(j)) = ({0},{1})".format(i,j))
-        print(extr_orientation,domino_orientation)
+        #print("(int(i),int(j)) = ({0},{1})".format(i,j))
+        #print(extr_orientation,domino_orientation)
 
 
         if extr_orientation == "W":
@@ -297,7 +300,7 @@ class game:
                         print("Le talon est vide : Joueur {0} ne peut définitivement plus jouer \n".format(joueur.num))
                 else:  # le joueur peut jouer, il joue
                     print("Plateau : {0}".format(self.plateau))
-                    print(self.plateau.grid[45:65,45:65])
+                    print(self.plateau.grid[45:65,47:65])
                     print("Joueur {0} : {1}".format(joueur.num, joueur))
                     if joueur.mode == "human" or joueur.mode == "Human":
                         domino_choisit = domino_jouable[int(input(
@@ -314,7 +317,9 @@ class game:
                                 extr_choisit = "a"
                             elif extr_choisit == "1":
                                 extr_choisit = "b"
-                        orientation_choisit = input("Quel orientation pour votre domino ? (Tapez N,S,E ou W)")
+
+
+                        orientation_choisit = input("Quel orientation pour votre domino ? (Orientations possibles : {0})".format(self.orientations_legales(extr_choisit)))
 
 
                     if joueur.mode == "IA_hasard":
@@ -330,13 +335,8 @@ class game:
                             elif random_side == 1:
                                 extr_choisit = "b"
 
-                        orientations_possibles = ["N","S","E","W"]
-                        if extr_choisit == "a" :
-                            orientations_possibles.remove(self.opposite_orientation(self.plateau.orientation_extr_a))
-                        elif extr_choisit == "b" :
-                            orientations_possibles.remove(self.opposite_orientation(self.plateau.orientation_extr_b))
-                        random_orientation = random.randint(0,2)
-                        orientation_choisit = orientations_possibles[random_orientation]
+                        orientations_possibles = self.orientations_legales(extr_choisit)
+                        orientation_choisit = random.choice(orientations_possibles)
 
 
                     if joueur.mode == "IA_max":
@@ -352,16 +352,11 @@ class game:
                             elif random_side == 1:
                                 extr_choisit = "b"
 
-                        orientations_possibles = ["N", "S", "E", "W"]
-                        if extr_choisit == "a":
-                            orientations_possibles.remove(self.opposite_orientation(self.plateau.orientation_extr_a))
-                        elif extr_choisit == "b":
-                            orientations_possibles.remove(self.opposite_orientation(self.plateau.orientation_extr_b))
-                        random_orientation = random.randint(0, 2)
-                        orientation_choisit = orientations_possibles[random_orientation]
+                        orientations_possibles = self.orientations_legales(extr_choisit)
+                        orientation_choisit = random.choice(orientations_possibles)
 
                     joueur.remove(domino_choisit)
-                    self.plateau.poser(domino_choisit, extr_choisit,orientation_choisit) # l'orientation est forcé sur W : A changer !
+                    self.plateau.poser(domino_choisit, extr_choisit,orientation_choisit)
                     print("\n")
 
                     if len(joueur) == 0:
@@ -376,6 +371,26 @@ class game:
             return("E")
         elif orientation == "E" :
             return("W")
+
+    def orientations_legales(self,extr_choisit):
+
+        if extr_choisit == "a" :
+            pos_extr = self.plateau.pos_extr_a
+            extr_orientation = self.plateau.orientation_extr_a
+        elif extr_choisit == "b":
+            pos_extr = self.plateau.pos_extr_b
+            extr_orientation = self.plateau.orientation_extr_b
+
+        orientation_possibles = ["N", "S", "E", "W"]
+        orientations_legales = []
+
+        for orientation_a_tester in orientation_possibles : # Pour chaque orientation on récupère les positions correspondantes et on verifie que la place est libre (" ")
+            (pos_a_checker_1,pos_a_checker_2) = self.plateau.position_demi_domino(pos_extr,extr_orientation,orientation_a_tester)
+            if self.plateau.grid[pos_a_checker_1] == " " and self.plateau.grid[pos_a_checker_2] == " " and orientation_a_tester != self.opposite_orientation(extr_orientation) :
+                orientations_legales.append(orientation_a_tester)
+
+        return(orientations_legales)
+
 
 
 
