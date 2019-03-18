@@ -377,6 +377,26 @@ class game:
         elif orientation == "E" :
             return("W")
 
+    def orientations_legales(self,extr_choisit):
+        
+        if extr_choisit == "a" :
+            pos_extr = self.plateau.pos_extr_a
+            extr_orientation = self.plateau.orientation_extr_a
+        elif extr_choisit == "b":
+            pos_extr = self.plateau.pos_extr_b
+            extr_orientation = self.plateau.orientation_extr_b
+
+        orientation_possibles = ["N", "S", "E", "W"]
+        orientations_legales = []
+
+        for orientation_a_tester in orientation_possibles : # Pour chaque orientation on récupère les positions correspondantes et on verifie que la place est libre (" ")
+            (pos_a_checker_1,pos_a_checker_2) = self.plateau.position_demi_domino(pos_extr,extr_orientation,orientation_a_tester)
+            if self.plateau.grid[pos_a_checker_1] == " " and self.plateau.grid[pos_a_checker_2] == " " :
+                orientations_legales.append(orientation_a_tester)
+
+        return(orientations_legales)
+
+
 
 
 
