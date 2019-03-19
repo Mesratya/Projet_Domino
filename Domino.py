@@ -64,25 +64,29 @@ class hand(list):
         return(dom_jouab)
 
     def domino_jouable_left_side(self):
-        '''Renvoie les dominos de la main qui sont posables du coté gauche du plateau'''
+        '''Renvoie les dominos de la main qui sont posables du coté a du plateau au sens des valeurs et de la place disponible'''
         dom_jouab_left_side = []
         extr_a = self.game.plateau.extr_a
         extr_b = self.game.plateau.extr_b
+        legal_a = self.game.orientations_legales("a")
+        legal_b = self.game.orientations_legales("b")
         for domino in self:
 
-            if (domino.vala == extr_a or domino.valb == extr_a) and domino.vala != extr_b and domino.valb != extr_b:
+            if (domino.vala == extr_a or domino.valb == extr_a) and legal_a != [] and ((domino.vala != extr_b and domino.valb != extr_b) or legal_b == []) :
                 dom_jouab_left_side.append(domino) # le domino n'est jouable que sur extr_a
 
         return (dom_jouab_left_side)
 
     def domino_jouable_right_side(self):
-        '''Renvoie les dominos de la main qui sont posables sur un unique coté du plateau'''
+        '''Renvoie les dominos de la main qui sont posables du coté b au sens des valeurs et de la place disponible'''
         dom_jouab_right_side = []
         extr_a = self.game.plateau.extr_a
         extr_b = self.game.plateau.extr_b
+        legal_a = self.game.orientations_legales("a")
+        legal_b = self.game.orientations_legales("b")
         for domino in self:
 
-            if (domino.vala == extr_b or domino.valb == extr_b) and domino.vala != extr_a and domino.valb != extr_a:
+            if (domino.vala == extr_b or domino.valb == extr_b) and legal_b != [] and ((domino.vala != extr_a and domino.valb != extr_a) or legal_a == []):
                 dom_jouab_right_side.append(domino)  # le domino n'est jouable que sur extr_b
 
         return (dom_jouab_right_side)
@@ -119,7 +123,10 @@ class plateau(list):
     def __init__(self,game):
         self.Nb_colonne  = int((4 * game.nb_domino) - 2)
         self.Nb_ligne = int((4 * game.nb_domino) - 1)
-        self.grid = np.array([[" "]*self.Nb_colonne]*self.Nb_ligne) # cette grille permet de lier les valeurs des demi-domino à leurs position réel sur le plateau, elle ne sert pas à l'IHM mais à la recherche de "contrainte topologique locale"
+        self.grid = np.array([["x"]*self.Nb_colonne]*self.Nb_ligne) # cette grille permet de lier les valeurs des demi-domino à leurs position réel sur le plateau, elle ne sert pas à l'IHM mais à la recherche de "contrainte topologique locale"
+        for i in range(46,63+1):
+            for j in range(48,63+1):
+                self.grid[i,j] = " "
         self.extr_a = None
         self.extr_b = None
         self.pos_extr_a = None # position des extremitées sur le plateau
@@ -353,6 +360,7 @@ class game:
                                 extr_choisit = "b"
 
                         orientations_possibles = self.orientations_legales(extr_choisit)
+                        print(orientations_possibles)
                         orientation_choisit = random.choice(orientations_possibles)
 
                     joueur.remove(domino_choisit)
