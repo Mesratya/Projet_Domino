@@ -93,7 +93,7 @@ class plateau(list):
 
             # c'est le demi domino b qui est collé ici on le met donc en premier dans le tuple
             domino.posb , domino.posa = self.position_demi_domino(self.pos_extr_a,self.orientation_extr_a,orientation)
-            print("pos(a) = {0} and pos(b) = {1} b is locked".format(domino.posa,domino.posb))
+
 
             self.grid[domino.posa] = int(domino.vala)  # à la position du demi domino on place sa valeur
             self.grid[domino.posb] = int(domino.valb)  # idem
@@ -115,7 +115,7 @@ class plateau(list):
 
             # c'est le demi domino a qui est collé ici on le met donc en premier dans le tuple
             domino.posa , domino.posb = self.position_demi_domino(self.pos_extr_b, self.orientation_extr_b,orientation)
-            print("pos(a) = {0} and pos(b) = {1} a is locked".format(domino.posa, domino.posb))
+
 
 
             self.grid[domino.posa] = int(domino.vala)  # à la position du demi domino on place sa valeur
