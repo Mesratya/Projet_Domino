@@ -12,7 +12,7 @@ class game:
         self.nb_domino = (pt_max+1)*(pt_max+2)/2
         self.nb_dominoparjoueur=nb_dominoparjoueur
         self.size = int(self.nb_domino * 2) # On s'assure que tous les dominos peuvent être alignés sur le plateau
-        self.modes_disponibles = ["human","IA_max","IA_hasard"] # mode de jeu des joueurs
+        self.modes_disponibles = ["human","IA_max","IA_hasard","IA_equilibre_restreint","IA_equilibre_global"] # mode de jeu des joueurs
 
         self.jouer_partie()
 
@@ -23,10 +23,10 @@ class game:
         self.Joueurs = []
         for i in range(self.nb_joueur):  # création des mains
 
-            mode = input("Donnez le mode du joueur {0} (tapez human, IA_max ou IA_hasard) ".format(i))
+            mode = input("Donnez le mode du joueur {0} (choisissez parmi {1}) ".format(i,self.modes_disponibles))
             while mode not in self.modes_disponibles :
                 print("---Saisie Incorrecte Veuillez Recommencer ---")
-                mode = input("Donnez le mode du joueur {0} (tapez human, IA_max ou IA_hasard) ".format(i))
+                mode = input("Donnez le mode du joueur {0} (choisissez parmi {1}) ".format(i,self.modes_disponibles))
 
             self.Joueurs.append(hand(i, self, mode))
         print("\n")
@@ -146,6 +146,124 @@ class game:
 
                     if joueur.mode == "IA_max":
                         domino_choisit = max(domino_jouable)
+                        if domino_choisit in joueur.domino_jouable_left_side():
+                            extr_choisit = "a"
+                        elif domino_choisit in joueur.domino_jouable_right_side():
+                            extr_choisit = "b"
+                        else:
+                            random_side = random.randint(0, 1)
+                            if random_side == 0:
+                                extr_choisit = "a"
+                            elif random_side == 1:
+                                extr_choisit = "b"
+
+                        orientations_possibles = self.orientations_legales(extr_choisit)
+                        print(orientations_possibles)
+                        orientation_choisit = random.choice(orientations_possibles)
+
+                    if joueur.mode == "IA_equilibre_restreint":
+
+                        domino_jouable = joueur.domino_jouable()
+                        print("domninos jouables poto: {0}".format(domino_jouable))
+                        Nb_famille_dominos = [] # Cette liste contient pour chaque domino le nombre de famille restant dans la main jouable une fois le domino correspondant posé
+
+                        for domino in domino_jouable: # Supposons que l'on pose le domino domino
+                            print("domnino en boucle: {0}".format(domino))
+
+                            dominos_restant = domino_jouable.copy()
+                            dominos_restant.remove(domino) # il restera les autres dominos
+                            print("domninos restants: {0}".format(dominos_restant))
+
+                            count_pt = [0] * (self.pt_max + 1)  # on compte combien il y'as de membre de chaque famille dans les dominos restant
+
+                            for domino_restant in dominos_restant:
+
+                                if domino_restant.vala == domino_restant.valb:
+                                    count_pt[domino_restant.vala] += 1
+                                else:
+                                    count_pt[domino_restant.vala] += 1
+                                    count_pt[domino_restant.valb] += 1
+
+                            nb_famille = 0
+
+                            for pt in count_pt :
+                                if pt > 0 :
+                                    nb_famille += 1
+
+                            Nb_famille_dominos.append(nb_famille)
+
+                        nb_famille_max = max(Nb_famille_dominos)
+                        print("nb_famille_max : {0}".format(nb_famille_max))
+                        dominos_equilibres = []
+                        for rang_domino in range(len(domino_jouable)) :
+
+                            if Nb_famille_dominos[rang_domino] == nb_famille_max :
+
+                                dominos_equilibres.append(domino_jouable[rang_domino])
+                        print("domino_equilibre : {}".format(dominos_equilibres))
+                        domino_choisit = max(dominos_equilibres) # si deux dominos induisent la diversité on prend celui qui à le plus de point (priorité à la defense)
+
+
+
+                        if domino_choisit in joueur.domino_jouable_left_side():
+                            extr_choisit = "a"
+                        elif domino_choisit in joueur.domino_jouable_right_side():
+                            extr_choisit = "b"
+                        else:
+                            random_side = random.randint(0, 1)
+                            if random_side == 0:
+                                extr_choisit = "a"
+                            elif random_side == 1:
+                                extr_choisit = "b"
+
+                        orientations_possibles = self.orientations_legales(extr_choisit)
+                        print(orientations_possibles)
+                        orientation_choisit = random.choice(orientations_possibles)
+
+                    if joueur.mode == "IA_equilibre_global":
+
+                        domino_jouable = joueur.domino_jouable()
+                        print("domninos jouables poto: {0}".format(domino_jouable))
+                        Nb_famille_dominos = [] # Cette liste contient pour chaque domino le nombre de famille restant dans la main une fois le domino correspondant posé
+
+                        for domino in domino_jouable: # Supposons que l'on pose le domino domino
+                            print("domnino en boucle: {0}".format(domino))
+
+                            dominos_restant = joueur.copy()
+                            dominos_restant.remove(domino) # il restera les autres dominos
+                            print("domninos restants: {0}".format(dominos_restant))
+
+                            count_pt = [0] * (self.pt_max + 1)  # on compte combien il y'as de membre de chaque famille dans les dominos restant
+
+                            for domino_restant in dominos_restant:
+
+                                if domino_restant.vala == domino_restant.valb:
+                                    count_pt[domino_restant.vala] += 1
+                                else:
+                                    count_pt[domino_restant.vala] += 1
+                                    count_pt[domino_restant.valb] += 1
+
+                            nb_famille = 0
+
+                            for pt in count_pt :
+                                if pt > 0 :
+                                    nb_famille += 1
+
+                            Nb_famille_dominos.append(nb_famille)
+
+                        nb_famille_max = max(Nb_famille_dominos)
+                        print("nb_famille_max : {0}".format(nb_famille_max))
+                        dominos_equilibres = []
+                        for rang_domino in range(len(domino_jouable)) :
+
+                            if Nb_famille_dominos[rang_domino] == nb_famille_max :
+
+                                dominos_equilibres.append(domino_jouable[rang_domino])
+                        print("domino_equilibre : {}".format(dominos_equilibres))
+                        domino_choisit = max(dominos_equilibres) # si deux dominos induisent la diversité on prend celui qui à le plus de point (priorité à la defense)
+
+
+
                         if domino_choisit in joueur.domino_jouable_left_side():
                             extr_choisit = "a"
                         elif domino_choisit in joueur.domino_jouable_right_side():
