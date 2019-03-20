@@ -158,21 +158,21 @@ class game:
                                 extr_choisit = "b"
 
                         orientations_possibles = self.orientations_legales(extr_choisit)
-                        print(orientations_possibles)
+
                         orientation_choisit = random.choice(orientations_possibles)
 
                     if joueur.mode == "IA_equilibre_restreint":
 
                         domino_jouable = joueur.domino_jouable()
-                        print("domninos jouables poto: {0}".format(domino_jouable))
+
                         Nb_famille_dominos = [] # Cette liste contient pour chaque domino le nombre de famille restant dans la main jouable une fois le domino correspondant posé
 
                         for domino in domino_jouable: # Supposons que l'on pose le domino domino
-                            print("domnino en boucle: {0}".format(domino))
+
 
                             dominos_restant = domino_jouable.copy()
                             dominos_restant.remove(domino) # il restera les autres dominos
-                            print("domninos restants: {0}".format(dominos_restant))
+
 
                             count_pt = [0] * (self.pt_max + 1)  # on compte combien il y'as de membre de chaque famille dans les dominos restant
 
@@ -193,14 +193,12 @@ class game:
                             Nb_famille_dominos.append(nb_famille)
 
                         nb_famille_max = max(Nb_famille_dominos)
-                        print("nb_famille_max : {0}".format(nb_famille_max))
                         dominos_equilibres = []
                         for rang_domino in range(len(domino_jouable)) :
 
                             if Nb_famille_dominos[rang_domino] == nb_famille_max :
 
                                 dominos_equilibres.append(domino_jouable[rang_domino])
-                        print("domino_equilibre : {}".format(dominos_equilibres))
                         domino_choisit = max(dominos_equilibres) # si deux dominos induisent la diversité on prend celui qui à le plus de point (priorité à la defense)
 
 
@@ -217,21 +215,21 @@ class game:
                                 extr_choisit = "b"
 
                         orientations_possibles = self.orientations_legales(extr_choisit)
-                        print(orientations_possibles)
+
                         orientation_choisit = random.choice(orientations_possibles)
 
                     if joueur.mode == "IA_equilibre_global":
 
                         domino_jouable = joueur.domino_jouable()
-                        print("domninos jouables poto: {0}".format(domino_jouable))
+
                         Nb_famille_dominos = [] # Cette liste contient pour chaque domino le nombre de famille restant dans la main une fois le domino correspondant posé
 
                         for domino in domino_jouable: # Supposons que l'on pose le domino domino
-                            print("domnino en boucle: {0}".format(domino))
+
 
                             dominos_restant = joueur.copy()
                             dominos_restant.remove(domino) # il restera les autres dominos
-                            print("domninos restants: {0}".format(dominos_restant))
+
 
                             count_pt = [0] * (self.pt_max + 1)  # on compte combien il y'as de membre de chaque famille dans les dominos restant
 
@@ -252,14 +250,14 @@ class game:
                             Nb_famille_dominos.append(nb_famille)
 
                         nb_famille_max = max(Nb_famille_dominos)
-                        print("nb_famille_max : {0}".format(nb_famille_max))
+
                         dominos_equilibres = []
                         for rang_domino in range(len(domino_jouable)) :
 
                             if Nb_famille_dominos[rang_domino] == nb_famille_max :
 
                                 dominos_equilibres.append(domino_jouable[rang_domino])
-                        print("domino_equilibre : {}".format(dominos_equilibres))
+
                         domino_choisit = max(dominos_equilibres) # si deux dominos induisent la diversité on prend celui qui à le plus de point (priorité à la defense)
 
 
@@ -276,7 +274,7 @@ class game:
                                 extr_choisit = "b"
 
                         orientations_possibles = self.orientations_legales(extr_choisit)
-                        print(orientations_possibles)
+
                         orientation_choisit = random.choice(orientations_possibles)
 
                     joueur.remove(domino_choisit)
