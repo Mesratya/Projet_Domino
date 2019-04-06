@@ -1,25 +1,51 @@
 import numpy as np
 
+"""
+[Module secondaire]
+Ce module est destiné à la définition de la classe plateau
+"""
+
 class plateau(list):
-    """Pour l'instant les domino sont posés en ligne sans considerer les virages"""
+    """La classe plateau modélise un plateau de jeu. Elle hérite de list. Ainsi la liste plateau est la chaîne de dominos posés.
+    La gestion de l'espace de jeu et des contraintes topologique se fait à l'aide du tableau numpy grid contenant des caractères(cf. attribut grid dans l'init)
+    """
 
     def __init__(self,game):
+        """
+        On crée la grille de jeu. La grille de jeu possède les dimensions maximales atteignables par un joueur qui alignerait volontairement tout les dominos
+        Ainsi, aucun gestion des effets de bords n'est nécessaire.Initialement On remplit la grille de "x" signifiant que la case n'est pas jouable.
+        :param game: référence au jeu en cours
+        """
         self.Nb_colonne  = int((4 * game.nb_domino) - 2)
         self.Nb_ligne = int((4 * game.nb_domino) - 1)
         self.grid = np.array([["x"]*self.Nb_colonne]*self.Nb_ligne) # cette grille permet de lier les valeurs des demi-domino à leurs position réel sur le plateau, elle ne sert pas à l'IHM mais à la recherche de "contrainte topologique locale"
-        for i in range(46,63+1):
+        for i in range(46,63+1): # on choisit une dimension jouables qui puisse être affiché dans la console python
             for j in range(48,63+1):
-                self.grid[i,j] = " "
-        self.extr_a = None
+                self.grid[i,j] = " " # une case vide " " est une case jouable sur laquel un demi-domino peut se poser, tout autre caractère est un obstacle
+        self.extr_a = None # valeurs des extrémitées de la chaîne de dominos
         self.extr_b = None
-        self.pos_extr_a = None # position des extremitées sur le plateau
+        self.pos_extr_a = None # position des extremitées de la chaine sur le plateau
         self.pos_extr_b = None
-        self.orientation_extr_a = None
+        self.orientation_extr_a = None # orientation des extrémitées
         self.orientation_extr_b = None
         self.game = game
 
     def position_demi_domino(self,pos_extr,extr_orientation,domino_orientation):
-        '''calcul de la position des deux demi domino en fonction de la position et de l'orientation de l'extremité et de l'orientation du domino à poser'''
+        """
+        Fonctionnement:
+        Calcul de la position des deux demi domino en fonction de la position et de l'orientation
+        de l'extremité et de l'orientation du domino à poser.
+
+        Détails:
+        On peut poser un domino dans 3 orientation possibles et le domino à l'extrémité de
+        la chaine possède aussi une orientation. Il est necessaire de distingué proprement les cas. Un schéma expiquant la manière dont les indices
+        ont été calculés sera disponible dans le rapport
+
+        :param pos_extr: position de l'extrémité de chaine considéré
+        :param extr_orientation: orientation de l'extrémité de chaine considéré
+        :param domino_orientation: orientation du domino choisit
+        :return: position des deux demi dominos
+        """
         (i,j) = pos_extr
         #print("(i,j) = ({0},{1})".format(i,j))
         (i,j) = (int(i),int(j))
@@ -60,9 +86,17 @@ class plateau(list):
                 return ((i+1, j), (i + 1, j + 1))
 
     def poser(self,domino,extr = None,orientation = None):
-        """ajoute le domino au plateau à l'extremité souhaité et selon l'orientation choisit (North,South,East,West)"""
+        """
+        ajoute le domino au plateau à l'extremité souhaité et selon l'orientation choisit (North,South,East,West)
 
-        if self.game.premiere_pose :
+
+        :param domino: domnio à poser
+        :param extr: extremité choisit pour la pose (facultatif, dans le cas d'une première pose par ex.)
+        :param orientation: orientation choisit (idem facultatif)
+        :return: ne renvoie rien...
+        """
+
+        if self.game.premiere_pose : # Cette section concerne la toute première pose de domino
             nb_domino = self.game.nb_domino
 
             domino.posa = (int(2*nb_domino-2),int(2*nb_domino-2)) # On place le premier domino horizontalement au centre du plateau

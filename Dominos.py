@@ -1,6 +1,18 @@
 import random
 
+"""
+[Module secondaire]
+Ce module est destiné à la définition des classes domino, main et talon car ces classes sont taille raisonable
+"""
+
 class domino:
+    """
+    La classe domino modelise un domino par ses valeurs et la position des demi-dominos
+    Initialement les dominos ne sont pas posé sur le plateau donc leurs positions sont à None
+    On considère qu'un domino possède deux parties chacune ayant une valeur et une position
+    Les lettres a et b distinguent les deux demi-dominos.
+
+    """
     def __init__(self,vala,valb,posa =(None,None),posb =(None,None)):
         self.vala=vala
         self.valb=valb
@@ -9,45 +21,70 @@ class domino:
 
 
     def __repr__(self):
+        """ La repésentation d'un domino sous forme de chaine de caractère permet de jouer dans un terminal"""
         return ("[{0}|{1}]".format(self.vala,self.valb))
 
 
     def val_totale(self):
+        """val_totale est la somme des points des deux parties d'un domino c'est
+            c'est la valeur d'un domino
+        """
         return(self.vala + self.valb)
 
-    def side_val(self,side):
-        if side == 0 :
-            return(self.val_a)
-        else :
-            return(self.val_b)
 
     def __gt__(self, other):
+        """On surcharge la méthode de comparaison en utilisant la valeur totale des dominos comme critère.
+        Ainsi on pourra trier facilement des listes de dominos. Cela permet aussi d'appliquer la méthode max à une liste de domino
+        et obtenir le domino de poids fort (cf. comportement de l'IA_max qui pose le plus grand domino)
+        """
         if self.val_totale() > other.val_totale() :
             return(True)
         else : return (False)
 
     def inverted(self):
-        """return the inverted domino"""
+        """return un domino inversé"""
         return(domino(self.valb,self.vala))
 
 
 class talon(list):
+    """
+    La classe talon modèlise le talon contenant tout les dominos au début d'une partie
+    """
     def __init__(self,pt_max):
+        """
+        Le constructeur init remplit le talon en créant les dominos necessaires à la parti.
+        La connaissance du nombre de points maximal (6 pour un jeu double-six) suffit à construire tout les dominos
+        :param pt_max: nombre de points maximal sur un domino
+        """
         for i in range(pt_max,-1,-1):
             for j in range(i,-1,-1):
                 self.append( domino(i,j) )
 
     def tirer(self):
+        """
+        Renvoie un domino au hasard et le supprime du talon
+        """
         domino = self.pop(random.randint(0,len(self)-1))
         return(domino)
 
 
 class hand(list):
-    def __init__(self,num,game,mode):
+    """
+    Cette classe modèlise à la fois un joueur et sa main de domino. Elle hérite de list. En effet hand contient tout les dominos de la main d'un joueur
+    """
+    def __init__(self,num,game,mode,name=None):
+        """
+
+        :param num: numéro (entier) attribué lors de l'enrengistrement du joueur au début du jeu
+        :param game: référence à la l'instance game qui gère le jeu
+        :param mode: Un joueur peut être human, IA_hasard, IA_max..., c'est une chaine de caractère. Elle doit appartenir à game.modes_disponibles
+        :param name: Nom du joueur, chaine de caractère. Facultatif
+        """
         self.num = num
         self.game = game
-        self.etat_bloque = False # si la main ne peut definitivement plus jouer cette variable vaut true
+        self.etat_bloque = False # si la main ne peut definitivement plus jouer cette variable vaut True
         self.mode = mode # mode est la nature du joueur : human, IA (il peut y avoir plusieur type d'IA)
+        self.name = name # le nom du joueur sert dans le cas de l'enrengistrement des scores
 
     def domino_jouable(self):
         '''Renvoie les dominos de la main qui sont posables sur le plateau'''
