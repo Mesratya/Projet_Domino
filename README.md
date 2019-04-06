@@ -1,14 +1,9 @@
 # Projet_Domino
 Projet Domino en python
 
-########################
-       Auteurs
-########################
-Mesrati Yassin et Gillian Roth FISE 2021
+Auteurs : Mesrati Yassin et Gillian Roth FISE 2021
 
-#######################
-    Source Github
-#######################
+Source Github:
 Notre projet à jour est disponile sur le dépot github : https://github.com/Mesratya/Projet_Domino
 (Telecharger le dossier Projet_Domino complet dans la branche master du dépot github)
 
