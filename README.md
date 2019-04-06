@@ -1,14 +1,17 @@
 # Projet_Domino
 Projet Domino en python
-~~~~~~~~~~~~~~~~~~~~~~~
+
+########################
        Auteurs
-~~~~~~~~~~~~~~~~~~~~~~~
+########################
 Mesrati Yassin et Gillian Roth FISE 2021
-~~~~~~~~~~~~~~~~~~~~~~~
+
+#######################
     Source Github
-~~~~~~~~~~~~~~~~~~~~~~~
+#######################
 Notre projet à jour est disponile sur le dépot github : https://github.com/Mesratya/Projet_Domino
 (Telecharger le dossier Projet_Domino complet dans la branche master du dépot github)
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  ____                  _                ____
 |  _ \  ___  _ __ ___ (_)_ __   ___    / ___| __ _ _ __ ___   ___
@@ -17,13 +20,12 @@ Notre projet à jour est disponile sur le dépot github : https://github.com/Mes
 |____/ \___/|_| |_| |_|_|_| |_|\___/   \____|\__,_|_| |_| |_|\___|
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 Le jeu se lance en executant le fichier Game.py via Python 3.6
 Il suffit de suivre les instructions dans la console
 Bon jeu !
 
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Informations complémentaires sur le Module Principal Gamepy 
 (infos disponiles dans la doc du Module Game.py) :
 
@@ -34,9 +36,6 @@ La présence des modules Dominos et Plateau dans le même repertoire est necessa
 
 Le jeu est en mode console. Il suffit de suivre les instructions de la console. L'état de la chaine de domino, la positon spatiale des valeurs 
 et toute information utile sera donné en console. Les erreurs de frappe sont géré par le jeu. 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
 
 Warning :
 La seul manière de faire planter le jeu est de modifier
