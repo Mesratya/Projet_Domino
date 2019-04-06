@@ -1,0 +1,20 @@
+
+#############################################################################
+# _____     _     _            _             ____                           #
+#|_   _|_ _| |__ | | ___    __| | ___  ___  / ___|  ___ ___  _ __ ___  ___  #
+#  | |/ _` | '_ \| |/ _ \  / _` |/ _ \/ __| \___ \ / __/ _ \| '__/ _ \/ __| #
+#  | | (_| | |_) | |  __/ | (_| |  __/\__ \  ___) | (_| (_) | | |  __/\__ \ #
+#  |_|\__,_|_.__/|_|\___|  \__,_|\___||___/ |____/ \___\___/|_|  \___||___/ #
+#                                                                           #
+#############################################################################
+
+
+IA_max gagne face a ['IA_hasard'] Score ==> 7 points
+IA_hasard gagne face a ['IA_max'] Score ==> 37 points
+IA_hasard gagne face a ['IA_max'] Score ==> 25 points
+IA_hasard gagne face a ['IA_max'] Score ==> 38 points
+IA_hasard gagne face a ['IA_max'] Score ==> 37 points
+IA_equilibre_restreint gagne face a ['IA_hasard'] Score ==> 60 points
+IA_max gagne face a ['IA_hasard'] Score ==> 59 points
+IA_max gagne face a ['IA_max'] Score ==> 60 points
+IA_max gagne face a ['IA_max', 'IA_max', 'IA_max'] Score ==> 54 points
