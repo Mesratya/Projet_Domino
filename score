@@ -18,3 +18,10 @@ IA_equilibre_restreint gagne face a ['IA_hasard'] Score ==> 60 points
 IA_max gagne face a ['IA_hasard'] Score ==> 59 points
 IA_max gagne face a ['IA_max'] Score ==> 60 points
 IA_max gagne face a ['IA_max', 'IA_max', 'IA_max'] Score ==> 54 points
+IA_equilibre_restreint gagne face a ['IA_max'] Score ==> 50 points
+IA_max gagne face a ['IA_equilibre_global', 'IA_hasard', 'IA_equilibre_restreint'] Score ==> 29 points
+IA_equilibre_global gagne face a ['IA_max', 'IA_hasard', 'IA_equilibre_restreint'] Score ==> 70 points
+IA_equilibre_global gagne face a ['IA_hasard', 'IA_equilibre_global', 'IA_max'] Score ==> 60 points
+IA_max gagne face a ['IA_hasard', 'IA_equilibre_restreint', 'IA_max'] Score ==> 76 points
+IA_max gagne face a ['IA_equilibre_restreint'] Score ==> 32 points
+IA_max gagne face a ['Uzrok'] Score ==> 45 points

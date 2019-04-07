@@ -48,7 +48,7 @@ class domino:
 
 class talon(list):
     """
-    La classe talon modèlise le talon contenant tout les dominos au début d'une partie
+    La classe talon modélise le talon contenant tous les dominos au début d'une partie
     """
     def __init__(self,pt_max):
         """
