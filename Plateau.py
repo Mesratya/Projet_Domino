@@ -16,7 +16,6 @@ class plateau(list):
         Ainsi, aucun gestion des effets de bords n'est nécessaire.Initialement On remplit la grille de "x" signifiant que la case n'est pas jouable.
         :param game: référence au jeu en cours
         """
-        self.Nb_colonne  = int((4 * game.nb_domino) - 2)
         self.Nb_ligne = int((4 * game.nb_domino) - 1)
         self.grid = np.array([["x"]*self.Nb_colonne]*self.Nb_ligne) # cette grille permet de lier les valeurs des demi-domino à leurs position réel sur le plateau, elle ne sert pas à l'IHM mais à la recherche de "contrainte topologique locale"
         for i in range(46,63+1): # on choisit une dimension jouables qui puisse être affiché dans la console python
