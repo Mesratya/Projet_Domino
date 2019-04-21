@@ -15,7 +15,7 @@ Notre projet à jour est disponile sur le dépot github : https://github.com/Mes
 |____/ \___/|_| |_| |_|_|_| |_|\___/   \____|\__,_|_| |_| |_|\___|
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Le jeu se lance en executant le fichier Game.py via Python 3.6
+Le jeu se lance en executant le fichier Main.py via Python 3.6
 Il suffit de suivre les instructions dans la console
 Bon jeu !
 

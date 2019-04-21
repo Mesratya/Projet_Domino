@@ -22,7 +22,7 @@ Bon jeu !
 
 
 Informations complémentaires sur le Module Principal Gamepy 
-(infos disponiles dans la doc du Module Game.py) :
+(infos disponiles dans la doc du Module Main.py) :
 
 Ce module est le coeur du Jeu de Domino. Pour jouer il suffit de lancer ce module. En effet le __main__ instanciera un objet game ce qui lancera automatiquement
 le jeu avec les paramètres par défauts. Pour rejouer relancez le module ou instanciez un objet game.
