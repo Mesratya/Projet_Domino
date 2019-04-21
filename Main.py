@@ -27,10 +27,10 @@ Warning :
 La seul manière de faire planter le jeu est de modifier
 les paramètres d'instanciation dans le main (ces derniers ne sont pas encore protégé par des setteur)
 c'est le seul endroit ou l'enclapsulation à une utilité puisque, tout autre interaction avec l'utilisateur
-se fait en controlant les données reçu
+se fait en controlant les données reçu.
 Par défaut la partie se fait à deux, avec un jeu double-six (six points max sur un domino) et 7 domino par joueurs. Ces paramètres sont modifiable lors de l'instanciation
 """
-class game:
+class Game:
     """
     Classe principale du Jeu. Elle  gère le déroulement du jeu et utilise les autres classes.
     """
@@ -64,8 +64,8 @@ class game:
         Cette procédure n'est pas effectuer dans l'init car on peut lancer plusieurs partie dans un même game (recommancement...)
         :return:
         """
-        self.plateau = plateau(self) # le plateau est initialement vide
-        self.talon = talon(self.pt_max) # le talon se remplit automatiquement
+        self.plateau = Plateau(self) # le plateau est initialement vide
+        self.talon = Talon(self.pt_max) # le talon se remplit automatiquement
         self.Joueurs = [] # liste des joueurs (objets hand) de la partie
 
         with open("game_opening") as f: # Ascii art (voir self.fin_de_partie() pour les références)
@@ -89,7 +89,7 @@ class game:
                 hand_name = mode
 
 
-            self.Joueurs.append(hand(i, self, mode,hand_name))
+            self.Joueurs.append(Hand(i, self, mode,hand_name))
         print("\n")
 
         # on remplit chaque main en tirant dans le talon
@@ -339,7 +339,7 @@ class game:
                         """
                         Ce référer à la docstring de IA_equilibre_restreint. On procède simplement à une généralisation
                         C'était l'algo prévu initialement mais la version restreinte à été obtenue par erreur. Cependant
-                        Il semble l'equilibre restreint soit plus performant (merci à la sérendipité...)
+                        Il semble l'equilibre restreint soit plus performant (le hasard fait bien les choses)
                         """
 
                         domino_jouable = joueur.domino_jouable()
@@ -526,4 +526,4 @@ if __name__ == "__main__":
     On modifier cette section en instanciant plusieurs game avec des paramères différants de ceux par défaut
     """
 
-    Game = game(scoring=True,nb_joueur=2)
+    Game = Game(scoring=True,nb_joueur=2)

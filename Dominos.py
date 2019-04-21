@@ -2,10 +2,10 @@ import random
 
 """
 [Module secondaire]
-Ce module est destiné à la définition des classes domino, main et talon car ces classes sont taille raisonable
+Ce module est destiné à la définition des classes Domino, Hand et Talon car ces classes sont taille raisonable
 """
 
-class domino:
+class Domino:
     """
     La classe domino modelise un domino par ses valeurs et la position des demi-dominos
     Initialement les dominos ne sont pas posé sur le plateau donc leurs positions sont à None
@@ -41,14 +41,14 @@ class domino:
             return(True)
         else : return (False)
 
-    def inverted(self):
+    def inverser(self):
         """return un domino inversé"""
-        return(domino(self.valb,self.vala))
+        return(Domino(self.valb,self.vala))
 
 
-class talon(list):
+class Talon(list):
     """
-    La classe talon modélise le talon contenant tous les dominos au début d'une partie
+    La classe Talon modélise le talon contenant tous les dominos au début d'une partie
     """
     def __init__(self,pt_max):
         """
@@ -58,7 +58,7 @@ class talon(list):
         """
         for i in range(pt_max,-1,-1):
             for j in range(i,-1,-1):
-                self.append( domino(i,j) )
+                self.append( Domino(i,j) )
 
     def tirer(self):
         """
@@ -68,7 +68,7 @@ class talon(list):
         return(domino)
 
 
-class hand(list):
+class Hand(list):
     """
     Cette classe modèlise à la fois un joueur et sa main de domino. Elle hérite de list. En effet hand contient tout les dominos de la main d'un joueur
     """

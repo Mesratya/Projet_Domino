@@ -5,7 +5,7 @@ import numpy as np
 Ce module est destiné à la définition de la classe plateau
 """
 
-class plateau(list):
+class Plateau(list):
     """La classe plateau modélise un plateau de jeu. Elle hérite de list. Ainsi la liste plateau est la chaîne de dominos posés.
     La gestion de l'espace de jeu et des contraintes topologique se fait à l'aide du tableau numpy grid contenant des caractères(cf. attribut grid dans l'init)
     """
@@ -119,7 +119,7 @@ class plateau(list):
         if extr == "a" :
 
             if domino.vala == self.extr_a :
-                domino = domino.inverted()
+                domino = domino.inverser()
 
             if orientation == self.game.opposite_orientation(self.orientation_extr_a) : # si le joueur exige l'orientation impossible convertir en son opposé
                 orientation = self.orientation_extr_a # on inverse l'orientation (par ex W-E n'est pas possible donc W-W)
@@ -142,7 +142,7 @@ class plateau(list):
         elif extr == "b" :
 
             if domino.valb == self.extr_b :
-                domino = domino.inverted()
+                domino = domino.inverser()
 
             if orientation == self.game.opposite_orientation(self.orientation_extr_b) : # si le joueur exige l'orientation impossible convertir en son opposé
                 orientation = self.orientation_extr_b # on inverse l'orientation (par ex W-E n'est pas possible donc W-W)
