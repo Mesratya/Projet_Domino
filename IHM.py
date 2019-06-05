@@ -52,6 +52,7 @@ class UI(QtWidgets.QMainWindow):
         self.thread.signal_refresh_plateau.connect(self.refresh_plateau)
         self.thread.signal_choix_orientation.connect(self.calque_choix_orientation)
         self.thread.signal_choix_mode.connect(self.calque_choix_mode)
+        self.thread.signal_choix_pseudo.connect(self.calque_choix_pseudo)
 
 
 
@@ -66,6 +67,7 @@ class UI(QtWidgets.QMainWindow):
         """
         initialisation d'une grille totalement transparante
         """
+        print("Nettoyage")
         self.clearLayout(self.ui.gridlayout)
         self.ui.gridlayout.setSpacing(0)
         self.ui.gridlayout.setContentsMargins(0, 0, 0, 0)
@@ -76,13 +78,17 @@ class UI(QtWidgets.QMainWindow):
                 pixmap = QtGui.QPixmap(None)
                 label = QtWidgets.QLabel()
                 label.setPixmap(pixmap)
-                label.setFixedSize(49, 49)
+                label.setFixedSize(30, 30)
                 self.ui.gridlayout.addWidget(label, i, j)
 
-    def init_grid(self,Nb_ligne,Nb_colonne):
+    def init_grid(self):
         '''
         initialisation d'une grille avec des cases grises en transparance
         '''
+
+        Nb_ligne = self.thread.game.plateau.Nb_ligne
+        Nb_colonne = self.thread.game.plateau.Nb_colonne
+
         self.clearLayout(self.ui.gridlayout)
         self.ui.gridlayout.setSpacing(0)
         self.ui.gridlayout.setContentsMargins(0, 0, 0, 0)
@@ -96,8 +102,9 @@ class UI(QtWidgets.QMainWindow):
                 label.setFixedSize(49, 49)
                 self.ui.gridlayout.addWidget(label, i, j)
 
-    def refresh_plateau(self,plateau):
-        self.init_grid(self.thread.game.Nb_ligne,self.thread.game.Nb_colonne)
+    def refresh_plateau(self):
+        plateau = self.thread.game.plateau
+        self.init_grid()
         """
         Méthode permettant de réafficher l'état du plateau proprement, ce qui permet de ce debarasser des layout clickables et autres ajouts temporaires
         """
@@ -118,8 +125,9 @@ class UI(QtWidgets.QMainWindow):
     def poser(self,domino):
         """
         Méthode permettant d'afficher un domino à l'ecran
-        Il vaudra peut être mieux l'associer à la futur classe gridwidget ?
+
         """
+
         pixmap = QtGui.QPixmap("images/"+str(domino.vala)+"/"+domino.couleur+".png")
         label = QtWidgets.QLabel()
         label.setPixmap(pixmap)
@@ -228,14 +236,19 @@ class UI(QtWidgets.QMainWindow):
         label.setFixedSize(99, 99)
         self.ui.gridlayout.addWidget(label, Nb_ligne//2, (Nb_colonne//2)-1)
 
-        pixmap = QtGui.QPixmap("images/human.png")
+        pixmap = QtGui.QPixmap("images/bot.png")
         label = ClickableLabel(message="IA_equilibre_global")
         label.clicked.connect(self.envoyer)
         label.setPixmap(pixmap)
         label.setFixedSize(99, 99)
         self.ui.gridlayout.addWidget(label, Nb_ligne //2, (Nb_colonne // 2) + 1)
 
-        
+
+    def calque_choix_pseudo(self):
+        pseudo = QtWidgets.QInputDialog.getText(self,"Choix du Pseudo","Entrer votre Pseudo :")[0]
+        self.signal_choix_fait.emit(pseudo)
+
+
     def label_pixmap(self,image_adresse):
         pixmap = QtGui.QPixmap(image_adresse)
         label = QtWidgets.QLabel()
@@ -269,14 +282,15 @@ class UI(QtWidgets.QMainWindow):
 class ThreadGame(QtCore.QThread):
 
     #Signaux customs
-    signal_init_grid = QtCore.pyqtSignal(int,int)
+    signal_init_grid = QtCore.pyqtSignal()
     signal_poser = QtCore.pyqtSignal(Domino)
     signal_main = QtCore.pyqtSignal(int,str,list,str)
     signal_choix_domino = QtCore.pyqtSignal(Hand)
     signal_choix_extremite = QtCore.pyqtSignal(Plateau)
-    signal_refresh_plateau = QtCore.pyqtSignal(Plateau)
+    signal_refresh_plateau = QtCore.pyqtSignal()
     signal_choix_orientation = QtCore.pyqtSignal(str)
     signal_choix_mode = QtCore.pyqtSignal()
+    signal_choix_pseudo = QtCore.pyqtSignal()
 
 
 
@@ -289,27 +303,31 @@ class ThreadGame(QtCore.QThread):
 
 
     def run(self):
-        self.game = Game(thread = self,nb_joueur=2)
+        self.game = Game(thread = self,nb_joueur=2,scoring = True)
         self.game.jouer_partie()
+
 
     def choix_domino(self,joueur):
         #print("choix_domino executé")
         #il faut demander à l'IHM de poser de souligner  les dominos de la main qui sont jouables
         # ces dominos devront être clicable et renvoyer un signal avec leurs nom
+        self.signal_refresh_plateau.emit()
         self.signal_choix_domino.emit(joueur)
         self.wait_signal(self.UI.signal_choix_fait)
         self.signal_main.emit(joueur.num,joueur.name,joueur,joueur.couleur) # le choix (même invalide) à été fait donc on réaffiche la main pour faire disparaitre le surlignage
         print("choix_fait :" + self.choix_fait)
         return(self.choix_fait)
 
+
     def choix_extremite(self,plateau):
         #il faut demander à l'IHM de poser de souligner  les deux extremités du plateau
         # ces demi dominos devront être clicable et renvoyer un signal avec leurs nom
         self.signal_choix_extremite.emit(plateau)
         self.wait_signal(self.UI.signal_choix_fait)
-        self.signal_refresh_plateau.emit(plateau)
+        self.signal_refresh_plateau.emit()
         print("choix_fait :" + self.choix_fait)
         return(self.choix_fait)
+
 
     def choix_orientation(self,extr_choisit):
         # il faut demander à l'IHM de poser des fleches (domino transparant ayant une inscription en fleche) clickable qui renvoie leurs orientations
@@ -317,20 +335,29 @@ class ThreadGame(QtCore.QThread):
 
         self.signal_choix_orientation.emit(extr_choisit)
         self.wait_signal(self.UI.signal_choix_fait)
-        self.signal_refresh_plateau.emit(self.game.plateau)
+        self.signal_refresh_plateau.emit()
         print("choix_fait :" + self.choix_fait)
         return (self.choix_fait)
+
 
     def choix_mode(self):
         # il faut demander à l'IHM de poser des icones humain et Ordi pour choisir les modes de jeu
 
-
+        #self.signal_init_grid.emit()
         self.signal_choix_mode.emit()
         self.wait_signal(self.UI.signal_choix_fait)
-        self.signal_refresh_plateau.emit(self.game.plateau)
         print("choix_fait :" + self.choix_fait)
+        self.signal_init_grid.emit()
         return (self.choix_fait)
 
+
+    def choix_pseudo(self):
+
+        self.signal_choix_pseudo.emit()
+        self.wait_signal(self.UI.signal_choix_fait)
+        self.signal_init_grid.emit()
+        print("choix_fait :" + self.choix_fait)
+        return (self.choix_fait)
 
 
     def update_choix(self,message):

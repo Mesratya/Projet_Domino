@@ -50,7 +50,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Jeu de Domino"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Domino Adventure"))
 
 
 if __name__ == "__main__":

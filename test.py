@@ -19,3 +19,11 @@ Utiliser des signaux """
 
 "4/ emettre le signal depuis le game en fesant referance au thread"
     self.thread.signalGameOk.emit()
+
+
+"générer une boite de dialogue qui récupère un texte"
+text, ok = QInputDialog.getText(self, 'Input Dialog',
+            'Enter your name:')
+
+"générer une message box toute simple --> Comment améliorer le rendu graphique ?"
+QtWidgets.QMessageBox.about(self, "orientation", "Choisissez une orientation")

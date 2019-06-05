@@ -1,7 +1,7 @@
 from Dominos import *
 from Plateau import *
 from PyQt5 import QtCore
-
+from time import sleep
 """
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  ____                  _                ____
@@ -82,17 +82,19 @@ class Game:
         for i in range(self.nb_joueur):  # création des mains
 
             # on récupère le mode de jeu de chaque joueur
-            mode = input("Donnez le mode du joueur {0} (choisissez parmi {1}) ".format(i,self.modes_disponibles))
-            mode_IHM = self.thread.choix_mode()
+            #mode = input("Donnez le mode du joueur {0} (choisissez parmi {1}) ".format(i,self.modes_disponibles))
+            mode = self.thread.choix_mode()
             while mode not in self.modes_disponibles :
                 print("---Saisie Incorrecte Veuillez Recommencer ---")
-                mode = input("Donnez le mode du joueur {0} (choisissez parmi {1}) ".format(i,self.modes_disponibles))
+                #mode = input("Donnez le mode du joueur {0} (choisissez parmi {1}) ".format(i,self.modes_disponibles))
+                mode = self.thread.choix_mode()
 
             # Dans le cas ou self.scoring = True on demande le pseudo du joueur sinon
             # on s'en tient à son mode de jeu
             hand_name = None
             if self.scoring and mode == "human" :
-                hand_name = input("Donnez votre Pseudo")
+                #hand_name = input("Donnez votre Pseudo")
+                hand_name = self.thread.choix_pseudo()
             else:
                 hand_name = mode
 
@@ -172,6 +174,7 @@ class Game:
                     print("Plateau : {0}".format(self.plateau))
                     print(self.plateau.grid)
                     print("Joueur {0} [{1}] : {2}".format(joueur.num,joueur.name, joueur))
+                    self.thread.signal_refresh_plateau.emit()
                     self.thread.signal_main.emit(joueur.num,joueur.name,joueur,joueur.couleur)
                     if joueur.mode == "human" or joueur.mode == "Human":
                         """
@@ -235,7 +238,8 @@ class Game:
                             orientation_choisit = self.thread.choix_orientation(extr_choisit)
 
 
-
+                    if joueur.mode != "human" :
+                        sleep(0.5)
 
 
                     if joueur.mode == "IA_hasard":

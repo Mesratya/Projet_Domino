@@ -30,7 +30,7 @@ class Plateau(list):
         self.orientation_extr_a = None # orientation des extrémitées
         self.orientation_extr_b = None
         self.game = game
-        self.game.thread.signal_init_grid.emit(self.Nb_ligne,self.Nb_colonne)
+        self.game.thread.signal_init_grid.emit()
 
 
     def position_demi_domino(self,pos_extr,extr_orientation,domino_orientation):
