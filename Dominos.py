@@ -13,11 +13,12 @@ class Domino:
     Les lettres a et b distinguent les deux demi-dominos.
 
     """
-    def __init__(self,vala,valb,posa =(None,None),posb =(None,None)):
+    def __init__(self,vala,valb,posa =(None,None),posb =(None,None),couleur = None):
         self.vala=vala
         self.valb=valb
         self.posa=posa # stocker ici la position des demi-dominos permettera à l'IHM d'afficher les dominos simplement en les parcourant dans l'objet plateau sans avoir à parcourir la grille grid
         self.posb=posb
+        self.couleur = couleur
 
 
     def __repr__(self):
@@ -72,7 +73,7 @@ class Hand(list):
     """
     Cette classe modèlise à la fois un joueur et sa main de domino. Elle hérite de list. En effet hand contient tout les dominos de la main d'un joueur
     """
-    def __init__(self,num,game,mode,name=None):
+    def __init__(self,num,game,mode,name=None,couleur = None):
         """
 
         :param num: numéro (entier) attribué lors de l'enrengistrement du joueur au début du jeu
@@ -85,6 +86,7 @@ class Hand(list):
         self.etat_bloque = False # si la main ne peut definitivement plus jouer cette variable vaut True
         self.mode = mode # mode est la nature du joueur : human, IA (il peut y avoir plusieur type d'IA)
         self.name = name # le nom du joueur sert dans le cas de l'enrengistrement des scores
+        self.couleur = couleur
 
     def domino_jouable(self):
         '''Renvoie les dominos de la main qui sont posables sur le plateau'''

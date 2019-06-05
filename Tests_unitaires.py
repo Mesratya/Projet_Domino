@@ -38,12 +38,12 @@ class Testdomino(unittest.TestCase):
                 val_totale = domino(i,j).val_totale()
                 self.assertEqual(val_totale,i+j)
 
-    def testInverted(self):
+    def testInverser(self):
         """Test de l'inversion d'un domino"""
         for i in range(10):
             for j in range(10):
                 D = domino(i,j)
-                D_inv = D.inverted()
+                D_inv = D.inverser()
                 self.assertEqual(D.vala,D_inv.valb)
                 self.assertEqual(D.valb,D_inv.vala)
 

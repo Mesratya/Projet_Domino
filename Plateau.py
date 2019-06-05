@@ -16,11 +16,12 @@ class Plateau(list):
         Ainsi, aucun gestion des effets de bords n'est nécessaire.Initialement On remplit la grille de "x" signifiant que la case n'est pas jouable.
         :param game: référence au jeu en cours
         """
-        self.Nb_colonne  = int((4 * game.nb_domino) - 2)
-        self.Nb_ligne = int((4 * game.nb_domino) - 1)
-        self.grid = np.array([["x"]*self.Nb_colonne]*self.Nb_ligne) # cette grille permet de lier les valeurs des demi-domino à leurs position réel sur le plateau, elle ne sert pas à l'IHM mais à la recherche de "contrainte topologique locale"
-        for i in range(46,63+1): # on choisit une dimension jouables qui puisse être affiché dans la console python
-            for j in range(48,63+1):
+        self.Nb_ligne = game.Nb_ligne
+        self.Nb_colonne  = game.Nb_colonne
+        self.grid = np.array([["x"]*(self.Nb_colonne+2)]*(self.Nb_ligne+2)) # cette grille permet de lier les valeurs des demi-domino à leurs position réel sur le plateau, elle ne sert pas à l'IHM mais à la recherche de "contrainte topologique locale"
+
+        for i in range(1,self.Nb_ligne+1): # on choisit une dimension jouables qui puisse être affiché dans la console python
+            for j in range(1,self.Nb_colonne+1):
                 self.grid[i,j] = " " # une case vide " " est une case jouable sur laquel un demi-domino peut se poser, tout autre caractère est un obstacle
         self.extr_a = None # valeurs des extrémitées de la chaîne de dominos
         self.extr_b = None
@@ -29,6 +30,8 @@ class Plateau(list):
         self.orientation_extr_a = None # orientation des extrémitées
         self.orientation_extr_b = None
         self.game = game
+        self.game.thread.signal_init_grid.emit(self.Nb_ligne,self.Nb_colonne)
+
 
     def position_demi_domino(self,pos_extr,extr_orientation,domino_orientation):
         """
@@ -85,7 +88,7 @@ class Plateau(list):
             elif domino_orientation == "E":
                 return ((i+1, j), (i + 1, j + 1))
 
-    def poser(self,domino,extr = None,orientation = None):
+    def poser(self,domino,extr = None,orientation = None,couleur = "orange"):
         """
         ajoute le domino au plateau à l'extremité souhaité et selon l'orientation choisit (North,South,East,West)
 
@@ -99,8 +102,8 @@ class Plateau(list):
         if self.game.premiere_pose : # Cette section concerne la toute première pose de domino
             nb_domino = self.game.nb_domino
 
-            domino.posa = (int(2*nb_domino-2),int(2*nb_domino-2)) # On place le premier domino horizontalement au centre du plateau
-            domino.posb = (int(2*nb_domino-2),int(2*nb_domino-1))
+            domino.posa = (int(self.Nb_ligne//2),int(self.Nb_colonne//2)) # On place le premier domino horizontalement au centre du plateau
+            domino.posb = (int(self.Nb_ligne//2),int(self.Nb_colonne//2)+1)
             self.pos_extr_a = domino.posa
             self.pos_extr_b = domino.posb
 
@@ -160,3 +163,6 @@ class Plateau(list):
             self.extr_b = domino.valb
             self.pos_extr_b = domino.posb
             self.orientation_extr_b = orientation
+
+        domino.couleur = couleur
+        self.game.thread.signal_poser.emit(domino)

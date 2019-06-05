@@ -1,0 +1,1 @@
+pyuic5 C:\Users\Yassi\PycharmProjects\ProjetDomino\interface.ui > C:\Users\Yassi\PycharmProjects\ProjetDomino\interface.py -x

@@ -1,5 +1,6 @@
 from Dominos import *
 from Plateau import *
+from PyQt5 import QtCore
 
 """
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -35,7 +36,7 @@ class Game:
     Classe principale du Jeu. Elle  gère le déroulement du jeu et utilise les autres classes.
     """
 
-    def __init__(self,pt_max = 6,nb_joueur = 2,nb_dominoparjoueur = 7,scoring = False):
+    def __init__(self,pt_max = 6,nb_joueur = 2,nb_dominoparjoueur = 7,scoring = False,thread = None,Nb_ligne = 15,Nb_colonne = 15):
         """
         On récupère les paramètres de la partie et on lance la partie avec self.jouer_partie
         Ainsi instancier un objet game lance automatiquement la partie.
@@ -51,11 +52,17 @@ class Game:
         self.pt_max = pt_max
         self.nb_domino = (pt_max+1)*(pt_max+2)/2
         self.nb_dominoparjoueur=nb_dominoparjoueur
-        self.size = int(self.nb_domino * 2) # On s'assure que tous les dominos peuvent être alignés sur le plateau
+        self.Nb_ligne = Nb_ligne
+        self.Nb_colonne = Nb_colonne
         self.modes_disponibles = ["human","IA_max","IA_hasard","IA_equilibre_restreint","IA_equilibre_global"] # mode de jeu des joueurs
+        self.couleurs_disponibles = ["orange","vert","bleu","bordeau"]
         self.scoring = scoring
+        self.thread = thread
 
-        self.jouer_partie() # Pour l'instant(pré-IHM) on lance la partie dès l'instanciation de game.
+        #self.jouer_partie() # Pour l'instant(pré-IHM) on lance la partie dès l'instanciation de game.
+
+
+
 
 
     def initialiser(self):
@@ -76,6 +83,7 @@ class Game:
 
             # on récupère le mode de jeu de chaque joueur
             mode = input("Donnez le mode du joueur {0} (choisissez parmi {1}) ".format(i,self.modes_disponibles))
+            mode_IHM = self.thread.choix_mode()
             while mode not in self.modes_disponibles :
                 print("---Saisie Incorrecte Veuillez Recommencer ---")
                 mode = input("Donnez le mode du joueur {0} (choisissez parmi {1}) ".format(i,self.modes_disponibles))
@@ -88,8 +96,8 @@ class Game:
             else:
                 hand_name = mode
 
-
-            self.Joueurs.append(Hand(i, self, mode,hand_name))
+            couleur = self.couleurs_disponibles[i]
+            self.Joueurs.append(Hand(i, self, mode,hand_name,couleur=couleur))
         print("\n")
 
         # on remplit chaque main en tirant dans le talon
@@ -139,7 +147,7 @@ class Game:
                 """
                 max_domino = joueur.max_domino()
                 joueur.remove(max_domino)
-                self.plateau.poser(max_domino)
+                self.plateau.poser(max_domino,couleur = joueur.couleur)
                 self.premiere_pose = False # on ne repassera plus par cette section
 
             # A partir d'ici (tour 2 et suivant) on distingue le mode de jeu du joueur pour jouer un tour
@@ -162,8 +170,9 @@ class Game:
                         print("Le talon est vide : Joueur {0} ne peut définitivement plus jouer \n".format(joueur.num))
                 else:  # le joueur n'est pas bloqué, donc il joue
                     print("Plateau : {0}".format(self.plateau))
-                    print(self.plateau.grid[45:65,47:65])
+                    print(self.plateau.grid)
                     print("Joueur {0} [{1}] : {2}".format(joueur.num,joueur.name, joueur))
+                    self.thread.signal_main.emit(joueur.num,joueur.name,joueur,joueur.couleur)
                     if joueur.mode == "human" or joueur.mode == "Human":
                         """
                         Dans le cas d'un joueur human il choisit le domino, l'extremité de la chaine et l'orientation
@@ -173,7 +182,9 @@ class Game:
                         print("Dominos jouables : {0}\n".format(domino_jouable))
                         rang_domino_choisit = -1
                         while rang_domino_choisit < 0 or rang_domino_choisit > len(domino_jouable)-1:
-                            rang_domino_choisit = input("Quel domino souhaitez vous posez ? (rang de ce domino) ")
+                            rang_domino_choisit = self.thread.choix_domino(joueur)
+                            #rang_domino_choisit = input("Quel domino souhaitez vous posez ? (rang de ce domino) ")
+
                             try :
                                 rang_domino_choisit = int(rang_domino_choisit)
                             except ValueError :
@@ -196,7 +207,8 @@ class Game:
                             rang_extr_choisit = -1
 
                             while rang_extr_choisit < 0 or rang_extr_choisit > 1:
-                                rang_extr_choisit = input("Choisissez de l'extrémité du plateau 0: {0} ou 1: {1} en tapant 0 ou 1".format(self.plateau[0],self.plateau[-1]))
+                                #rang_extr_choisit = input("Choisissez l'extrémité du plateau 0: {0} ou 1: {1} en tapant 0 ou 1".format(self.plateau[0],self.plateau[-1]))
+                                rang_extr_choisit = self.thread.choix_extremite(self.plateau)
                                 try:
                                     rang_extr_choisit = int(rang_extr_choisit)
                                 except ValueError:
@@ -214,11 +226,13 @@ class Game:
                                 extr_choisit = "b"
 
 
-                        orientation_choisit = input("Quel orientation pour votre domino ? (Orientations possibles : {0})".format(self.orientations_legales(extr_choisit)))
+                        #orientation_choisit = input("Quel orientation pour votre domino ? (Orientations possibles : {0})".format(self.orientations_legales(extr_choisit)))
+                        orientation_choisit = self.thread.choix_orientation(extr_choisit)
                         while orientation_choisit not in self.orientations_legales(extr_choisit) :
 
                             print("Saisie incorrecte tapez seulement une lettre parmi celle proposées")
-                            orientation_choisit = input("Orientations possibles : {0}".format(self.orientations_legales(extr_choisit)))
+                            #orientation_choisit = input("Orientations possibles : {0}".format(self.orientations_legales(extr_choisit)))
+                            orientation_choisit = self.thread.choix_orientation(extr_choisit)
 
 
 
@@ -400,7 +414,7 @@ class Game:
                         orientation_choisit = random.choice(orientations_possibles)
 
                     joueur.remove(domino_choisit)
-                    self.plateau.poser(domino_choisit, extr_choisit,orientation_choisit)
+                    self.plateau.poser(domino_choisit, extr_choisit,orientation_choisit,couleur=joueur.couleur)
                     print("\n")
 
                     if len(joueur) == 0:
@@ -526,4 +540,4 @@ if __name__ == "__main__":
     On modifier cette section en instanciant plusieurs game avec des paramères différants de ceux par défaut
     """
 
-    Game = Game(scoring=True,nb_joueur=2)
+    Game = Game(scoring=False,nb_joueur=2)

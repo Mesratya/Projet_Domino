@@ -1,0 +1,362 @@
+# -*- coding: utf-8 -*-
+
+import sys
+from PyQt5 import QtGui, QtCore, QtWidgets
+from interface import Ui_MainWindow
+from Main import *
+
+class ClickableLabel(QtWidgets.QLabel):
+    """
+    label clicable inspiré de https://stackoverflow.com/questions/21354516/is-possible-to-put-an-image-instead-of-a-button-and-make-it-clickable
+    """
+
+    clicked = QtCore.pyqtSignal(str)
+
+    def __init__(self,message):
+        super(ClickableLabel, self).__init__()
+        # pixmap = QtGui.QPixmap(width, height)
+        # pixmap.fill(QtGui.QColor(color))
+        # self.setPixmap(pixmap)
+        # self.setObjectName(color)
+        self.message = message
+
+    def mousePressEvent(self, event):
+        self.clicked.emit(self.message)
+
+class UI(QtWidgets.QMainWindow):
+
+    signal_choix_fait = QtCore.pyqtSignal(str)
+
+    def __init__(self):
+        super().__init__()
+        # Configuration de l'interface utilisateur.
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+
+
+        # Ajout du fond d'écran
+        self.setStyleSheet("QMainWindow{ background-image: url(images/texture_1); }")
+
+        # Création d'une partie
+        #self.game = Game(UI = self)
+
+        #création du thread gérant le jeu lui même
+        self.thread = ThreadGame(UI = self)
+
+        #connection des signaux provenant du thread
+        self.thread.signal_init_grid.connect(self.init_grid_void)
+        self.thread.signal_poser.connect(self.poser)
+        self.thread.signal_main.connect(self.afficher_main)
+        self.thread.signal_choix_domino.connect(self.calque_choix_domino)
+        self.thread.signal_choix_extremite.connect(self.calque_choix_extremite)
+        self.thread.signal_refresh_plateau.connect(self.refresh_plateau)
+        self.thread.signal_choix_orientation.connect(self.calque_choix_orientation)
+        self.thread.signal_choix_mode.connect(self.calque_choix_mode)
+
+
+
+        #démarage du thread et donc de Game
+        self.thread.start()
+
+        #Liste des layouts de dominos de la main
+        self.hand_layout_container = []
+
+
+    def init_grid_void(self,Nb_ligne,Nb_colonne):
+        """
+        initialisation d'une grille totalement transparante
+        """
+        self.clearLayout(self.ui.gridlayout)
+        self.ui.gridlayout.setSpacing(0)
+        self.ui.gridlayout.setContentsMargins(0, 0, 0, 0)
+
+        # initialisation de la grille
+        for i in range(Nb_ligne):
+            for j in range(Nb_colonne):
+                pixmap = QtGui.QPixmap(None)
+                label = QtWidgets.QLabel()
+                label.setPixmap(pixmap)
+                label.setFixedSize(49, 49)
+                self.ui.gridlayout.addWidget(label, i, j)
+
+    def init_grid(self,Nb_ligne,Nb_colonne):
+        '''
+        initialisation d'une grille avec des cases grises en transparance
+        '''
+        self.clearLayout(self.ui.gridlayout)
+        self.ui.gridlayout.setSpacing(0)
+        self.ui.gridlayout.setContentsMargins(0, 0, 0, 0)
+
+        # initialisation de la grille
+        for i in range(Nb_ligne):
+            for j in range(Nb_colonne):
+                pixmap = QtGui.QPixmap("images/calque_gris")
+                label = QtWidgets.QLabel()
+                label.setPixmap(pixmap)
+                label.setFixedSize(49, 49)
+                self.ui.gridlayout.addWidget(label, i, j)
+
+    def refresh_plateau(self,plateau):
+        self.init_grid(self.thread.game.Nb_ligne,self.thread.game.Nb_colonne)
+        """
+        Méthode permettant de réafficher l'état du plateau proprement, ce qui permet de ce debarasser des layout clickables et autres ajouts temporaires
+        """
+        for domino in plateau :
+            self.poser(domino)
+
+
+
+    def clearLayout(self,layout):
+        """
+        Méthode permettant de vider un layout de ces widgets
+        """
+        while layout.count():
+            child = layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
+
+    def poser(self,domino):
+        """
+        Méthode permettant d'afficher un domino à l'ecran
+        Il vaudra peut être mieux l'associer à la futur classe gridwidget ?
+        """
+        pixmap = QtGui.QPixmap("images/"+str(domino.vala)+"/"+domino.couleur+".png")
+        label = QtWidgets.QLabel()
+        label.setPixmap(pixmap)
+        label.setFixedSize(49, 49)
+        self.ui.gridlayout.addWidget(label,domino.posa[0]-1, domino.posa[1]-1)
+
+        pixmap = QtGui.QPixmap("images/" + str(domino.valb) + "/"+domino.couleur+".png")
+        label = QtWidgets.QLabel()
+        label.setPixmap(pixmap)
+        label.setFixedSize(49, 49)
+        self.ui.gridlayout.addWidget(label, domino.posb[0]-1, domino.posb[1]-1)
+
+
+
+
+    def afficher_main(self,num,name,main,couleur):
+
+        self.clearLayout(self.ui.handlayout)
+        self.hand_layout_container = []
+        # self.ui.handlayout.setSpacing(0)
+        # self.ui.handlayout.setContentsMargins(0, 0, 0, 0)
+
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.ui.handlayout.addItem(spacerItem)
+
+        for domino in main :
+            dominowidget = QtWidgets.QWidget(self.ui.handwidget)
+            dominowidget.setObjectName("widget_"+str(domino))
+            domino_layout = QtWidgets.QVBoxLayout(dominowidget)
+            domino_layout.setObjectName(str(domino))
+            domino_layout.setSpacing(0)
+            domino_layout.setContentsMargins(0,0,0,0)
+            self.ui.handlayout.addWidget(dominowidget)
+
+
+            self.hand_layout_container.append(domino_layout)
+
+            label = self.label_pixmap("images/" + str(domino.vala) + "/" + couleur + ".png")
+            domino_layout.addWidget(label)
+
+
+            label = self.label_pixmap("images/" + str(domino.valb) + "/" + couleur + ".png")
+            domino_layout.addWidget(label)
+
+
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.ui.handlayout.addItem(spacerItem)
+
+    def calque_choix_domino(self,joueur):
+        dominos_jouables = [str(domino) for domino in joueur.domino_jouable()]
+        cnt_layout = 0 # compte l'indice des layout jouables
+        for domino_layout in self.hand_layout_container:
+            if domino_layout.objectName() in dominos_jouables :
+                object_name = domino_layout.objectName()
+                vala, valb = object_name[1], object_name[3]
+                self.clearLayout(domino_layout)
+                label = self.label_pixmap_surligne("images/" + str(vala) + "/" + joueur.couleur + ".png",message= str(cnt_layout))
+                domino_layout.addWidget(label)
+                label = self.label_pixmap_surligne("images/" + str(valb) + "/" + joueur.couleur + ".png",message= str(cnt_layout))
+                domino_layout.addWidget(label)
+                cnt_layout += 1
+
+    def calque_choix_extremite(self,plateau):
+        extr_a = plateau.extr_a
+        extr_b = plateau.extr_b
+        pos_extr_a = plateau.pos_extr_a
+        pos_extr_b = plateau.pos_extr_b
+        couleur_a = plateau[0].couleur
+        couleur_b = plateau[-1].couleur
+
+
+        label = self.label_pixmap_surligne("images/" + str(extr_a) + "/" + couleur_a + ".png",message= str(0))
+        self.ui.gridlayout.addWidget(label, pos_extr_a[0] - 1, pos_extr_a[1] - 1)
+
+        label = self.label_pixmap_surligne("images/" + str(extr_b) + "/" + couleur_b + ".png", message=str(1))
+        self.ui.gridlayout.addWidget(label, pos_extr_b[0] - 1, pos_extr_b[1] - 1)
+
+    def calque_choix_orientation(self,extr_choisit):
+
+        orientations_legales = self.thread.game.orientations_legales(extr_choisit)
+        plateau = self.thread.game.plateau
+
+
+        for orientation in orientations_legales :
+            if extr_choisit == "a":
+                pos_extr = plateau.pos_extr_a
+                extr_orientation = plateau.orientation_extr_a
+            if extr_choisit == "b":
+                pos_extr = plateau.pos_extr_b
+                extr_orientation = plateau.orientation_extr_b
+            i,j = plateau.position_demi_domino(pos_extr, extr_orientation, domino_orientation=orientation)[1]
+            label = self.label_pixmap_surligne("images/arrow/" + orientation + ".png" ,message = orientation)
+            self.ui.gridlayout.addWidget(label,i-1,j-1)
+
+    def calque_choix_mode(self):
+
+        Nb_ligne = self.thread.game.plateau.Nb_ligne
+        Nb_colonne = self.thread.game.plateau.Nb_colonne
+
+        self.init_grid_void(Nb_ligne,Nb_colonne) # on s'assure que la grille ne contient des cases totalement tranparantes
+
+        pixmap = QtGui.QPixmap("images/human.png")
+        label = ClickableLabel(message = "human")
+        label.clicked.connect(self.envoyer)
+        label.setPixmap(pixmap)
+        label.setFixedSize(99, 99)
+        self.ui.gridlayout.addWidget(label, Nb_ligne//2, (Nb_colonne//2)-1)
+
+        pixmap = QtGui.QPixmap("images/human.png")
+        label = ClickableLabel(message="IA_equilibre_global")
+        label.clicked.connect(self.envoyer)
+        label.setPixmap(pixmap)
+        label.setFixedSize(99, 99)
+        self.ui.gridlayout.addWidget(label, Nb_ligne //2, (Nb_colonne // 2) + 1)
+
+        
+    def label_pixmap(self,image_adresse):
+        pixmap = QtGui.QPixmap(image_adresse)
+        label = QtWidgets.QLabel()
+        label.setPixmap(pixmap)
+        label.setFixedSize(49, 49)
+        return(label)
+
+    def label_pixmap_surligne(self,image_adresse,message):
+
+        image = QtGui.QImage(image_adresse)
+        overlay = QtGui.QImage("images/calque_selection.png")
+        painter = QtGui.QPainter()
+        painter.begin(image)
+        painter.drawImage(0, 0, overlay)
+        painter.end()
+        label = ClickableLabel(message)
+        label.clicked.connect(self.envoyer)
+        label.setPixmap(QtGui.QPixmap.fromImage(image))
+        label.setFixedSize(49, 49)
+        return (label)
+
+    def envoyer(self,message):
+        self.signal_choix_fait.emit(message)
+
+
+
+
+
+
+
+class ThreadGame(QtCore.QThread):
+
+    #Signaux customs
+    signal_init_grid = QtCore.pyqtSignal(int,int)
+    signal_poser = QtCore.pyqtSignal(Domino)
+    signal_main = QtCore.pyqtSignal(int,str,list,str)
+    signal_choix_domino = QtCore.pyqtSignal(Hand)
+    signal_choix_extremite = QtCore.pyqtSignal(Plateau)
+    signal_refresh_plateau = QtCore.pyqtSignal(Plateau)
+    signal_choix_orientation = QtCore.pyqtSignal(str)
+    signal_choix_mode = QtCore.pyqtSignal()
+
+
+
+    def __init__(self,UI,parent = None):
+        super(ThreadGame,self).__init__(parent)
+        self.choix_fait = None
+        self.UI = UI
+        self.UI.signal_choix_fait.connect(self.update_choix)
+
+
+
+    def run(self):
+        self.game = Game(thread = self,nb_joueur=2)
+        self.game.jouer_partie()
+
+    def choix_domino(self,joueur):
+        #print("choix_domino executé")
+        #il faut demander à l'IHM de poser de souligner  les dominos de la main qui sont jouables
+        # ces dominos devront être clicable et renvoyer un signal avec leurs nom
+        self.signal_choix_domino.emit(joueur)
+        self.wait_signal(self.UI.signal_choix_fait)
+        self.signal_main.emit(joueur.num,joueur.name,joueur,joueur.couleur) # le choix (même invalide) à été fait donc on réaffiche la main pour faire disparaitre le surlignage
+        print("choix_fait :" + self.choix_fait)
+        return(self.choix_fait)
+
+    def choix_extremite(self,plateau):
+        #il faut demander à l'IHM de poser de souligner  les deux extremités du plateau
+        # ces demi dominos devront être clicable et renvoyer un signal avec leurs nom
+        self.signal_choix_extremite.emit(plateau)
+        self.wait_signal(self.UI.signal_choix_fait)
+        self.signal_refresh_plateau.emit(plateau)
+        print("choix_fait :" + self.choix_fait)
+        return(self.choix_fait)
+
+    def choix_orientation(self,extr_choisit):
+        # il faut demander à l'IHM de poser des fleches (domino transparant ayant une inscription en fleche) clickable qui renvoie leurs orientations
+        # Il faut les poser autour de l'extremité choisit et n'afficher que celle appartenant à game.orientation_legale(extr_choisit)
+
+        self.signal_choix_orientation.emit(extr_choisit)
+        self.wait_signal(self.UI.signal_choix_fait)
+        self.signal_refresh_plateau.emit(self.game.plateau)
+        print("choix_fait :" + self.choix_fait)
+        return (self.choix_fait)
+
+    def choix_mode(self):
+        # il faut demander à l'IHM de poser des icones humain et Ordi pour choisir les modes de jeu
+
+
+        self.signal_choix_mode.emit()
+        self.wait_signal(self.UI.signal_choix_fait)
+        self.signal_refresh_plateau.emit(self.game.plateau)
+        print("choix_fait :" + self.choix_fait)
+        return (self.choix_fait)
+
+
+
+    def update_choix(self,message):
+        self.choix_fait = message
+
+
+    def wait_signal(self,signal): # fonction qui bloque le thread jusqu'a reception du signal
+
+        loop = QtCore.QEventLoop()
+        signal.connect(loop.quit)
+        loop.exec_()
+
+
+
+
+
+
+
+
+
+
+
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    window = UI()
+    window.show()
+    app.exec_()
+
+
