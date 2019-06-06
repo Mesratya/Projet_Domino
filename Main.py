@@ -139,7 +139,8 @@ class Game:
             self.Jeu_en_cours = False
             self.recommencer = True
             # on prévient tout le monde de la situation
-            print("Le joueur {0} possède 5 dominos de la même famille, il faut recommencer la partie !".format(joueur.num))
+            #print("Le joueur {0} possède 5 dominos de la même famille, il faut recommencer la partie !".format(joueur.num))
+            self.thread.message_box("Le joueur {0} possède 5 dominos de la même famille, il faut recommencer la partie !".format(joueur.num))
         else :
             if self.premiere_pose:
                 """
@@ -165,11 +166,13 @@ class Game:
                     if len(self.talon) > 0:  # il peut piocher donc il pioche et passe son tour
                         domino_pioche = self.talon.tirer()
                         joueur.append(domino_pioche)
-                        print("Joueur {0} ne peut pas jouer, il pioche {1} et passe son tour \n".format(joueur.num,
-                                                                                                        domino_pioche))
+                        #print("Joueur {0} ne peut pas jouer, il pioche {1} et passe son tour \n".format(joueur.num,
+                        #                                                                               domino_pioche))
+                        self.thread.message_box("Joueur {0} [{1}] ne peut pas jouer, il pioche {2} et passe son tour \n".format(joueur.num,joueur.name,domino_pioche),joueur.mode)
                     else:
                         joueur.etat_bloque = True  # il ne peut pas piocher, le talon est vide, il est définitvement bloqué
-                        print("Le talon est vide : Joueur {0} ne peut définitivement plus jouer \n".format(joueur.num))
+                        #print("Le talon est vide : Joueur {0} ne peut définitivement plus jouer \n".format(joueur.num))
+                        self.thread.message_box("Le talon est vide : Joueur {0} ne peut définitivement plus jouer \n".format(joueur.num),joueur.mode)
                 else:  # le joueur n'est pas bloqué, donc il joue
                     print("Plateau : {0}".format(self.plateau))
                     print(self.plateau.grid)
@@ -492,8 +495,11 @@ class Game:
         self.fin_de_partie()
 
     def fin_de_partie(self):
-        if self.recommencer : # le cas de base n'est pas vérifié donc on appelle self.jouer_partie
+
+        if self.recommencer == True : # le cas de base n'est pas vérifié donc on appelle self.jouer_partie
+
             print("Nouvelle Partie")
+            self.thread.message_box("Nouvelle Partie")
             self.jouer_partie()
         else :
             # le fameux cas de base : la partie n'as pas à être recommencé donc on ne rappel pas self.jouer_partie
@@ -508,7 +514,9 @@ class Game:
                 if joueur != gagnant :
                     score_gagnant += joueur.pt_restant()
 
-            print("Le gagnant est Joueur {0} [{1}] avec un score de {2} points !".format(gagnant.num,gagnant.name,score_gagnant))
+            #print("Le gagnant est Joueur {0} [{1}] avec un score de {2} points !".format(gagnant.num,gagnant.name,score_gagnant))
+            self.thread.message_box("Le gagnant est Joueur {0} [{1}] avec un score de {2} points !".format(gagnant.num,gagnant.name,score_gagnant))
+
 
             if self.scoring :
                 # on récupère le nom des heureux perdants...
@@ -522,19 +530,25 @@ class Game:
                     f.write("{0} gagne face a {1} Score ==> {2} points".format(gagnant.name,Perdants_name,score_gagnant))
                     f.write("\n")
 
+            self.thread.init_main()
+            self.recommencer = self.thread.demande_recommencer()
+            if self.recommencer in ["Yes","Maybe","can you repeat the question ?"]:
+                self.thread.message_box("Nouvelle Partie")
+                self.jouer_partie()
+
 
             with open("game_ending") as f: # L'auteur des ascii arts dominos est David Riley et ils proviennent de http://ascii.co.uk/
                 game_ending = f.read()
             print(game_ending)
 
-            Consultation_score = input("Voulez-vous consulter la Table des Scores ? [répondre par oui ou par non]")
-            while Consultation_score not in ["oui","non"]:
-                print("-------Réponse incorrecte-------")
-                Consultation_score = input("Voulez-vous consulter la Table des Scores ? [répondre par oui ou par non]")
-            if Consultation_score == "oui":
-                with open("score") as f:
-                    score = f.read()
-                print(score)
+            # Consultation_score = input("Voulez-vous consulter la Table des Scores ? [répondre par oui ou par non]")
+            # while Consultation_score not in ["oui","non"]:
+            #     print("-------Réponse incorrecte-------")
+            #     Consultation_score = input("Voulez-vous consulter la Table des Scores ? [répondre par oui ou par non]")
+            # if Consultation_score == "oui":
+            #     with open("score") as f:
+            #         score = f.read()
+            #     print(score)
 
 
 

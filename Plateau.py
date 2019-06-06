@@ -3,6 +3,7 @@ import numpy as np
 """
 [Module secondaire]
 Ce module est destiné à la définition de la classe plateau
+
 """
 
 class Plateau(list):

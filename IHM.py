@@ -2,6 +2,7 @@
 
 import sys
 from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5 import QtMultimedia as M
 from interface import Ui_MainWindow
 from Main import *
 
@@ -35,7 +36,9 @@ class UI(QtWidgets.QMainWindow):
 
 
         # Ajout du fond d'écran
-        self.setStyleSheet("QMainWindow{ background-image: url(images/texture_1); }")
+        indice_background = str(np.random.randint(0,4))
+        print(indice_background)
+        self.setStyleSheet("QMainWindow{ background-image: url(images/textures/texture_"+ indice_background +"); }")
 
         # Création d'une partie
         #self.game = Game(UI = self)
@@ -53,6 +56,10 @@ class UI(QtWidgets.QMainWindow):
         self.thread.signal_choix_orientation.connect(self.calque_choix_orientation)
         self.thread.signal_choix_mode.connect(self.calque_choix_mode)
         self.thread.signal_choix_pseudo.connect(self.calque_choix_pseudo)
+        self.thread.signal_message_box.connect(self.afficher_message_box)
+        self.thread.signal_choix_recommencer.connect(self.choix_recommencer)
+        self.thread.signal_init_main.connect(self.init_main)
+        self.thread.signal_terminus.connect(self.terminus)
 
 
 
@@ -61,6 +68,9 @@ class UI(QtWidgets.QMainWindow):
 
         #Liste des layouts de dominos de la main
         self.hand_layout_container = []
+
+        # on lance la musique du jeu
+
 
 
     def init_grid_void(self,Nb_ligne,Nb_colonne):
@@ -111,6 +121,11 @@ class UI(QtWidgets.QMainWindow):
         for domino in plateau :
             self.poser(domino)
 
+    def init_main(self):
+        self.clearLayout(self.ui.handlayout)
+
+    def terminus(self):
+        self.close()
 
 
     def clearLayout(self,layout):
@@ -152,6 +167,11 @@ class UI(QtWidgets.QMainWindow):
 
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.ui.handlayout.addItem(spacerItem)
+        label = QtWidgets.QLabel("Joueur {0} [{1}]".format(num,name))
+        label.setStyleSheet("QLabel { background-color : rgb(71,55,55,129); color : black; font: bold 20px;}")
+        self.ui.handlayout.addWidget(label)
+
+
 
         for domino in main :
             dominowidget = QtWidgets.QWidget(self.ui.handwidget)
@@ -248,7 +268,13 @@ class UI(QtWidgets.QMainWindow):
         pseudo = QtWidgets.QInputDialog.getText(self,"Choix du Pseudo","Entrer votre Pseudo :")[0]
         self.signal_choix_fait.emit(pseudo)
 
+    def afficher_message_box(self,message):
+        msg = QtWidgets.QMessageBox.question(self,None,message,QtWidgets.QMessageBox.Ok)
+        self.signal_choix_fait.emit("ok")
 
+    def choix_recommencer(self):
+        message = QtWidgets.QInputDialog.getItem(self,"Voulez-vous recommencer la partie ?","Choix :",("Yes","No","Maybe","I don't know","can you repeat the question ?"))[0]
+        self.signal_choix_fait.emit(message)
     def label_pixmap(self,image_adresse):
         pixmap = QtGui.QPixmap(image_adresse)
         label = QtWidgets.QLabel()
@@ -279,6 +305,8 @@ class UI(QtWidgets.QMainWindow):
 
 
 
+
+
 class ThreadGame(QtCore.QThread):
 
     #Signaux customs
@@ -291,6 +319,10 @@ class ThreadGame(QtCore.QThread):
     signal_choix_orientation = QtCore.pyqtSignal(str)
     signal_choix_mode = QtCore.pyqtSignal()
     signal_choix_pseudo = QtCore.pyqtSignal()
+    signal_message_box = QtCore.pyqtSignal(str)
+    signal_choix_recommencer = QtCore.pyqtSignal()
+    signal_init_main = QtCore.pyqtSignal()
+    signal_terminus = QtCore.pyqtSignal()
 
 
 
@@ -305,6 +337,8 @@ class ThreadGame(QtCore.QThread):
     def run(self):
         self.game = Game(thread = self,nb_joueur=2,scoring = True)
         self.game.jouer_partie()
+
+        self.terminus()
 
 
     def choix_domino(self,joueur):
@@ -352,16 +386,35 @@ class ThreadGame(QtCore.QThread):
 
 
     def choix_pseudo(self):
-
         self.signal_choix_pseudo.emit()
         self.wait_signal(self.UI.signal_choix_fait)
         self.signal_init_grid.emit()
         print("choix_fait :" + self.choix_fait)
         return (self.choix_fait)
 
+    def message_box(self,message,mode_joueur = None):
+        if (mode_joueur == None or mode_joueur == "human") :
+            self.signal_message_box.emit(message)
+            self.wait_signal(self.UI.signal_choix_fait)
+            print("choix_fait :" + self.choix_fait)
+            return (self.choix_fait)
+
+    def demande_recommencer(self):
+        self.signal_choix_recommencer.emit()
+        self.wait_signal(self.UI.signal_choix_fait)
+        self.signal_init_grid.emit()
+        print("choix_fait :" + self.choix_fait)
+        return (self.choix_fait)
+
+    def terminus(self):
+        self.signal_terminus.emit()
+
 
     def update_choix(self,message):
         self.choix_fait = message
+
+    def init_main(self):
+        self.signal_init_main.emit()
 
 
     def wait_signal(self,signal): # fonction qui bloque le thread jusqu'a reception du signal
