@@ -2,9 +2,9 @@
 
 import sys
 from PyQt5 import QtGui, QtCore, QtWidgets
-from PyQt5 import QtMultimedia as M
 from interface import Ui_MainWindow
 from Main import *
+from PyQt5.QtMultimedia import QSound
 
 class ClickableLabel(QtWidgets.QLabel):
     """
@@ -40,6 +40,11 @@ class UI(QtWidgets.QMainWindow):
         print(indice_background)
         self.setStyleSheet("QMainWindow{ background-image: url(images/textures/texture_"+ indice_background +"); }")
 
+
+        self.put_sound = QSound("sounds/effect/put.wav")
+        self.background_sound = QSound(None)
+
+
         # Création d'une partie
         #self.game = Game(UI = self)
 
@@ -60,6 +65,11 @@ class UI(QtWidgets.QMainWindow):
         self.thread.signal_choix_recommencer.connect(self.choix_recommencer)
         self.thread.signal_init_main.connect(self.init_main)
         self.thread.signal_terminus.connect(self.terminus)
+        self.thread.signal_background_sound.connect(self.init_background_sound)
+        self.thread.signal_sound_fx.connect(self.sound_fx)
+        self.thread.signal_nb_joueur.connect(self.choix_nombre_joueur)
+        self.thread.signal_go.connect(self.go)
+
 
 
 
@@ -69,7 +79,9 @@ class UI(QtWidgets.QMainWindow):
         #Liste des layouts de dominos de la main
         self.hand_layout_container = []
 
-        # on lance la musique du jeu
+        # # on lance la musique du jeu !
+        # self.background_sound.play()
+
 
 
 
@@ -155,6 +167,7 @@ class UI(QtWidgets.QMainWindow):
         label.setFixedSize(49, 49)
         self.ui.gridlayout.addWidget(label, domino.posb[0]-1, domino.posb[1]-1)
 
+        self.put_sound.play()
 
 
 
@@ -242,7 +255,7 @@ class UI(QtWidgets.QMainWindow):
             label = self.label_pixmap_surligne("images/arrow/" + orientation + ".png" ,message = orientation)
             self.ui.gridlayout.addWidget(label,i-1,j-1)
 
-    def calque_choix_mode(self):
+    def calque_choix_mode(self,num):
 
         Nb_ligne = self.thread.game.plateau.Nb_ligne
         Nb_colonne = self.thread.game.plateau.Nb_colonne
@@ -263,10 +276,18 @@ class UI(QtWidgets.QMainWindow):
         label.setFixedSize(99, 99)
         self.ui.gridlayout.addWidget(label, Nb_ligne //2, (Nb_colonne // 2) + 1)
 
+        # if num == 0 :
+        #     self.init_intro_sound()
+        #     self.intro_sound.play()
+
 
     def calque_choix_pseudo(self):
         pseudo = QtWidgets.QInputDialog.getText(self,"Choix du Pseudo","Entrer votre Pseudo :")[0]
         self.signal_choix_fait.emit(pseudo)
+
+    def choix_nombre_joueur(self):
+        nb_joueur = QtWidgets.QInputDialog.getItem(self, "Choix du nombre de Joueurs", "Nombre de Joueurs :",("2","3","4"))[0]
+        self.signal_choix_fait.emit(str(nb_joueur))
 
     def afficher_message_box(self,message):
         msg = QtWidgets.QMessageBox.question(self,None,message,QtWidgets.QMessageBox.Ok)
@@ -300,6 +321,55 @@ class UI(QtWidgets.QMainWindow):
         self.signal_choix_fait.emit(message)
 
 
+    def init_intro_sound(self):
+        
+        indice_background = str(np.random.randint(0, 4))
+        print(indice_background)
+        self.setStyleSheet("QMainWindow{ background-image: url(images/textures/texture_" + indice_background + "); }")
+
+        indice_intro = str(np.random.randint(0, 4))
+        self.intro_sound = QSound("sounds/intro/intro_" + indice_intro + ".wav")
+        self.background_sound.stop()
+
+
+    def init_background_sound(self):
+        # choix des sons au hasard dans la playlist (extrait de Zelda Windwaker)
+        indice_theme = str(np.random.randint(0, 5))
+        self.background_sound = QSound("sounds/main_theme/theme_" + indice_theme + ".wav")
+        self.background_sound.setLoops(-1)
+
+        self.intro_sound.stop()
+        sleep(0.2)
+        self.background_sound.play()
+        print("back_sound")
+
+    def sound_fx(self,adress_sound):
+        self.background_sound.stop()
+        sleep(0.4)
+        self.fx_sound = QSound(adress_sound)
+        self.fx_sound.play()
+
+    def resize(self):
+        self.ui.setFixedSize(self.ui.centralWidget.size())
+
+    def go(self):
+
+        Nb_ligne = self.thread.game.plateau.Nb_ligne
+        Nb_colonne = self.thread.game.plateau.Nb_colonne
+
+        self.init_grid_void(Nb_ligne,Nb_colonne)  # on s'assure que la grille ne contient des cases totalement tranparantes
+
+        pixmap = QtGui.QPixmap("images/manette.png")
+        label = ClickableLabel(message="human")
+        label.clicked.connect(self.envoyer)
+        label.setPixmap(pixmap)
+        label.setFixedSize(99, 99)
+        self.ui.gridlayout.addWidget(label, Nb_ligne // 2, (Nb_colonne // 2))
+
+
+        self.init_intro_sound()
+        self.intro_sound.play()
+
 
 
 
@@ -317,13 +387,16 @@ class ThreadGame(QtCore.QThread):
     signal_choix_extremite = QtCore.pyqtSignal(Plateau)
     signal_refresh_plateau = QtCore.pyqtSignal()
     signal_choix_orientation = QtCore.pyqtSignal(str)
-    signal_choix_mode = QtCore.pyqtSignal()
+    signal_choix_mode = QtCore.pyqtSignal(int)
     signal_choix_pseudo = QtCore.pyqtSignal()
     signal_message_box = QtCore.pyqtSignal(str)
     signal_choix_recommencer = QtCore.pyqtSignal()
     signal_init_main = QtCore.pyqtSignal()
     signal_terminus = QtCore.pyqtSignal()
-
+    signal_background_sound = QtCore.pyqtSignal()
+    signal_sound_fx = QtCore.pyqtSignal(str)
+    signal_nb_joueur = QtCore.pyqtSignal()
+    signal_go = QtCore.pyqtSignal()
 
 
     def __init__(self,UI,parent = None):
@@ -334,8 +407,11 @@ class ThreadGame(QtCore.QThread):
 
 
 
+
     def run(self):
-        self.game = Game(thread = self,nb_joueur=2,scoring = True)
+        self.nb_joueur = self.choix_nombre_joueur()
+
+        self.game = Game(thread = self,nb_joueur=self.nb_joueur,scoring = True)
         self.game.jouer_partie()
 
         self.terminus()
@@ -374,11 +450,11 @@ class ThreadGame(QtCore.QThread):
         return (self.choix_fait)
 
 
-    def choix_mode(self):
+    def choix_mode(self,num):
         # il faut demander à l'IHM de poser des icones humain et Ordi pour choisir les modes de jeu
 
-        #self.signal_init_grid.emit()
-        self.signal_choix_mode.emit()
+        self.signal_refresh_plateau.emit()
+        self.signal_choix_mode.emit(num)
         self.wait_signal(self.UI.signal_choix_fait)
         print("choix_fait :" + self.choix_fait)
         self.signal_init_grid.emit()
@@ -406,6 +482,14 @@ class ThreadGame(QtCore.QThread):
         print("choix_fait :" + self.choix_fait)
         return (self.choix_fait)
 
+
+    def choix_nombre_joueur(self):
+        self.signal_nb_joueur.emit()
+        self.wait_signal(self.UI.signal_choix_fait)
+
+        print("choix_fait :" + self.choix_fait)
+        return (int(self.choix_fait))
+
     def terminus(self):
         self.signal_terminus.emit()
 
@@ -416,12 +500,21 @@ class ThreadGame(QtCore.QThread):
     def init_main(self):
         self.signal_init_main.emit()
 
+    def go(self):
+
+        self.signal_go.emit()
+        self.wait_signal(self.UI.signal_choix_fait)
+        print("choix_fait :" + self.choix_fait)
+        self.signal_init_grid.emit()
+
 
     def wait_signal(self,signal): # fonction qui bloque le thread jusqu'a reception du signal
 
         loop = QtCore.QEventLoop()
         signal.connect(loop.quit)
         loop.exec_()
+
+
 
 
 

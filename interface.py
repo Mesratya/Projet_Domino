@@ -8,7 +8,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import QtMultimedia as M
-
+from PyQt5.QtMultimedia import QSound
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -55,6 +55,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Domino Adventure"))
+
 
 
 

@@ -75,19 +75,26 @@ class Game:
         self.talon = Talon(self.pt_max) # le talon se remplit automatiquement
         self.Joueurs = [] # liste des joueurs (objets hand) de la partie
 
+        self.thread.go()
+
         with open("game_opening") as f: # Ascii art (voir self.fin_de_partie() pour les références)
             game_opening = f.read()
         print(game_opening)
 
+
+
+
+        self.thread.message_box("Choisissez le mode de jeu des participants (humain ou IA)")
         for i in range(self.nb_joueur):  # création des mains
 
             # on récupère le mode de jeu de chaque joueur
             #mode = input("Donnez le mode du joueur {0} (choisissez parmi {1}) ".format(i,self.modes_disponibles))
-            mode = self.thread.choix_mode()
+
+            mode = self.thread.choix_mode(num = i)
             while mode not in self.modes_disponibles :
                 print("---Saisie Incorrecte Veuillez Recommencer ---")
                 #mode = input("Donnez le mode du joueur {0} (choisissez parmi {1}) ".format(i,self.modes_disponibles))
-                mode = self.thread.choix_mode()
+                mode = self.thread.choix_mode(num = i)
 
             # Dans le cas ou self.scoring = True on demande le pseudo du joueur sinon
             # on s'en tient à son mode de jeu
@@ -483,6 +490,8 @@ class Game:
         self.recommencer = False
         self.premiere_pose = True
 
+        self.thread.signal_background_sound.emit()
+        
         while self.Jeu_en_cours :
 
             for joueur in self.Joueurs :
@@ -500,6 +509,7 @@ class Game:
 
             print("Nouvelle Partie")
             self.thread.message_box("Nouvelle Partie")
+            self.thread.init_main()
             self.jouer_partie()
         else :
             # le fameux cas de base : la partie n'as pas à être recommencé donc on ne rappel pas self.jouer_partie
@@ -515,6 +525,7 @@ class Game:
                     score_gagnant += joueur.pt_restant()
 
             #print("Le gagnant est Joueur {0} [{1}] avec un score de {2} points !".format(gagnant.num,gagnant.name,score_gagnant))
+            self.thread.signal_sound_fx.emit("sounds/effect/win.wav")
             self.thread.message_box("Le gagnant est Joueur {0} [{1}] avec un score de {2} points !".format(gagnant.num,gagnant.name,score_gagnant))
 
 
